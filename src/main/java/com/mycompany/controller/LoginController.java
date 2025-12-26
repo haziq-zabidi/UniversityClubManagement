@@ -43,11 +43,13 @@ public class LoginController extends HttpServlet{
             
             ResultSet rs = stmt.executeQuery("select * from users");
             
+            /**
             while(rs.next()){
                 response.getWriter().println("nama: " + rs.getString("name"));
             }
             
             stmt.executeUpdate("INSERT INTO `users` (`id`, `name`, `email`, `password`) VALUES (NULL, 'Amadi', 'ahmad@gmail.com', SHA1('test456'))");
+            **/
             stmt.close();
             conn.close();
             
