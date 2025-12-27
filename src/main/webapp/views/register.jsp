@@ -9,9 +9,20 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Register Page</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <form method="POST" action="register">
+            <input type="text" name="userName" required>
+            <input type="email" name="userEmail" required>
+            <input type="password" name="userPassword" required>
+            <input type="number" name="matricNo" required>
+            <select name="faculty">
+                <option value="FSKM">FSKM</option> 
+                <option value="KPPIM">KPPIM</option>
+            </select>
+            <input type="text" name="programme" required>
+            
+        </form>
     </body>
 </html>
