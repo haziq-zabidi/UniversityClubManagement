@@ -4,6 +4,7 @@
  */
 package com.mycompany.model;
 
+import java.time.LocalDate;
 /**
  *
  * @author TUF
@@ -12,14 +13,14 @@ public class Announcement {
     private int announcementID;
     private String announcementTitle;
     private String announcementMessage;
-    private String publishDate;
+    private LocalDate publishDate;
     private int clubID;
     private int authorUserID;
 
     public Announcement() {
     }
 
-    public Announcement(int announcementID, String announcementTitle, String announcementMessage, String publishDate, int clubID, int authorUserID) {
+    public Announcement(int announcementID, String announcementTitle, String announcementMessage, LocalDate publishDate, int clubID, int authorUserID) {
         this.announcementID = announcementID;
         this.announcementTitle = announcementTitle;
         this.announcementMessage = announcementMessage;
@@ -40,7 +41,7 @@ public class Announcement {
         return announcementMessage;
     }
 
-    public String getPublishDate() {
+    public LocalDate getPublishDate() {
         return publishDate;
     }
 
@@ -64,7 +65,7 @@ public class Announcement {
         this.announcementMessage = announcementMessage;
     }
 
-    public void setPublishDate(String publishDate) {
+    public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
     }
 

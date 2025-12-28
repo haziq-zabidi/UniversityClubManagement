@@ -4,13 +4,15 @@
  */
 package com.mycompany.model;
 
+import java.time.LocalDate;
+
 /**
  *
  * @author TUF
  */
 public class Membership {
     private int membershipID;
-    private String joinDate;
+    private LocalDate joinDate;
     private String membershipStatus;
     private int userID;
     private int clubID;
@@ -18,7 +20,7 @@ public class Membership {
     public Membership() {
     }
 
-    public Membership(int membershipID, String joinDate, String membershipStatus, int userID, int clubID) {
+    public Membership(int membershipID, LocalDate joinDate, String membershipStatus, int userID, int clubID) {
         this.membershipID = membershipID;
         this.joinDate = joinDate;
         this.membershipStatus = membershipStatus;
@@ -30,7 +32,7 @@ public class Membership {
         return membershipID;
     }
 
-    public String getJoinDate() {
+    public LocalDate getJoinDate() {
         return joinDate;
     }
 
@@ -50,7 +52,7 @@ public class Membership {
         this.membershipID = membershipID;
     }
 
-    public void setJoinDate(String joinDate) {
+    public void setJoinDate(LocalDate joinDate) {
         this.joinDate = joinDate;
     }
 

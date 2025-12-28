@@ -31,7 +31,7 @@ public class LoginController extends HttpServlet{
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            String url = "jdbc:mariadb://localhost:3307/club_management_db";
+            String url = "jdbc:mariadb://localhost:3306/club_management_db";
             String username = "root";
             String password = "";
             
