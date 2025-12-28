@@ -4,13 +4,14 @@
  */
 package com.mycompany.model;
 
+import java.time.LocalDate;
 /**
  *
  * @author TUF
  */
 public class Attendance {
-    private int anttendanceID;
-    private String attendanceDate;
+    private int attendanceID;
+    private LocalDate attendanceDate;
     private String attendanceStatus;
     private int activityID;
     private int userID;
@@ -18,8 +19,8 @@ public class Attendance {
     public Attendance() {
     }
 
-    public Attendance(int anttendanceID, String attendanceDate, String attendanceStatus, int activityID, int userID) {
-        this.anttendanceID = anttendanceID;
+    public Attendance(int anttendanceID, LocalDate attendanceDate, String attendanceStatus, int activityID, int userID) {
+        this.attendanceID = anttendanceID;
         this.attendanceDate = attendanceDate;
         this.attendanceStatus = attendanceStatus;
         this.activityID = activityID;
@@ -27,10 +28,10 @@ public class Attendance {
     }
 
     public int getAnttendanceID() {
-        return anttendanceID;
+        return attendanceID;
     }
 
-    public String getAttendanceDate() {
+    public LocalDate getAttendanceDate() {
         return attendanceDate;
     }
 
@@ -46,11 +47,11 @@ public class Attendance {
         return userID;
     }
 
-    public void setAnttendanceID(int anttendanceID) {
-        this.anttendanceID = anttendanceID;
+    public void setAttendanceID(int anttendanceID) {
+        this.attendanceID = anttendanceID;
     }
 
-    public void setAttendanceDate(String attendanceDate) {
+    public void setAttendanceDate(LocalDate attendanceDate) {
         this.attendanceDate = attendanceDate;
     }
 

@@ -4,6 +4,8 @@
  */
 package com.mycompany.model;
 
+import java.time.LocalDate;
+
 /**
  *
  * @author TUF
@@ -11,9 +13,9 @@ package com.mycompany.model;
 public class Activity {
     private int activityID;
     private String activityName;
-    private String activiyDescription;
-    private String startDate;
-    private String endDate;
+    private String activityDescription;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String activityLocation;
     private String activityType;
     private String activityStatus;
@@ -23,10 +25,10 @@ public class Activity {
     public Activity() {
     }
 
-    public Activity(int activityID, String activityName, String activiyDescription, String startDate, String endDate, String activityLocation, String activityType, String activityStatus, int maxParticipants, int clubID) {
+    public Activity(int activityID, String activityName, String activiyDescription, LocalDate startDate, LocalDate endDate, String activityLocation, String activityType, String activityStatus, int maxParticipants, int clubID) {
         this.activityID = activityID;
         this.activityName = activityName;
-        this.activiyDescription = activiyDescription;
+        this.activityDescription = activiyDescription;
         this.startDate = startDate;
         this.endDate = endDate;
         this.activityLocation = activityLocation;
@@ -44,15 +46,15 @@ public class Activity {
         return activityName;
     }
 
-    public String getActiviyDescription() {
-        return activiyDescription;
+    public String getActivityDescription() {
+        return activityDescription;
     }
 
-    public String getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public String getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
@@ -84,15 +86,15 @@ public class Activity {
         this.activityName = activityName;
     }
 
-    public void setActiviyDescription(String activiyDescription) {
-        this.activiyDescription = activiyDescription;
+    public void setActivityDescription(String activiyDescription) {
+        this.activityDescription = activiyDescription;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
