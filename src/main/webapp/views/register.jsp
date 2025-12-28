@@ -13,16 +13,23 @@
     </head>
     <body>
         <form method="POST" action="register">
+            <label>username</label>
             <input type="text" name="userName" required>
+            <label>email</label>
             <input type="email" name="userEmail" required>
+            <label>password</label>
             <input type="password" name="userPassword" required>
+            <label>matric no.</label>
             <input type="number" name="matricNo" required>
+            <label>faculty</label>
             <select name="faculty">
                 <option value="FSKM">FSKM</option> 
                 <option value="KPPIM">KPPIM</option>
             </select>
+            <label>programme</label>
             <input type="text" name="programme" required>
-            
+            <a href="">login</a>
+            <input type="submit">
         </form>
     </body>
 </html>
