@@ -67,8 +67,8 @@ public class LoginController extends HttpServlet{
                     // Student role
                     response.sendRedirect(request.getContextPath() + "/student/dashboard");
                 } else {
-                    // Default dashboard
-                    response.sendRedirect(request.getContextPath() + "/dashboard");
+                    // Committee role
+                    response.sendRedirect(request.getContextPath() + "/committee/dashboard");
                 }
                 
             } else {

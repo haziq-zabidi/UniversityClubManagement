@@ -29,6 +29,7 @@
     <select name="role">
         <option value="1">Admin</option>
         <option value="2">Student</option>
+        <option value="3">Committee</option>
     </select>
 
     <br><br>
@@ -64,7 +65,9 @@
             <td>
                 <c:choose>
                     <c:when test="${u.roleID == 1}">Admin</c:when>
-                    <c:otherwise>Student</c:otherwise>
+                    <c:when test="${u.roleID == 2}">Student</c:when>
+                    <c:when test="${u.roleID == 3}">Committee</c:when>
+                    <c:otherwise>Unknown</c:otherwise>
                 </c:choose>
             </td>
 
@@ -74,17 +77,18 @@
                 <form action="${pageContext.request.contextPath}/admin/manage-users" 
                       method="post" style="display:inline;">
                     <input type="hidden" name="action" value="update"/>
-
                     <input type="hidden" name="email" value="${u.userEmail}"/>
 
                     Name: <input type="text" name="name" value="${u.userName}" required>
                     Password: <input type="text" name="password" value="${u.userPassword}" required>
                     Faculty: <input type="text" name="faculty" value="${u.faculty}">
                     Programme: <input type="text" name="programme" value="${u.programme}">
+
                     Role:
                     <select name="role">
                         <option value="1" ${u.roleID == 1 ? "selected" : ""}>Admin</option>
                         <option value="2" ${u.roleID == 2 ? "selected" : ""}>Student</option>
+                        <option value="3" ${u.roleID == 3 ? "selected" : ""}>Committee</option>
                     </select>
 
                     <button type="submit">Update</button>
