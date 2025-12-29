@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.model;
 
 import java.time.LocalDate;
@@ -16,6 +12,9 @@ public class Membership {
     private String membershipStatus;
     private int userID;
     private int clubID;
+    
+    // NEW FIELD - Add this to hold the joined User data for committee management
+    private User user;
 
     public Membership() {
     }
@@ -68,5 +67,12 @@ public class Membership {
         this.clubID = clubID;
     }
     
-    
+    // NEW GETTER AND SETTER - Add these methods for committee member management
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

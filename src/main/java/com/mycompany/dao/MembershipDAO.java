@@ -1,6 +1,7 @@
 package com.mycompany.dao;
 
 import com.mycompany.model.Membership;
+import com.mycompany.model.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,6 +146,93 @@ public class MembershipDAO {
             ps.setInt(4, userID);
 
             return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // ================= COMMITTEE MEMBER MANAGEMENT METHODS =================
+    
+    /**
+     * Get all memberships for a specific club with user details joined
+     * @param clubID The club ID
+     * @return List of Membership objects with User details populated
+     */
+    public List<Membership> getMembershipsByClub(int clubID) throws SQLException, ClassNotFoundException {
+        List<Membership> memberships = new ArrayList<>();
+        String sql = "SELECT m.membershipID, m.joinDate, m.membershipStatus, m.userID, m.clubID, " +
+                     "u.userName, u.userEmail, u.matricNo, u.faculty, u.programme, u.roleID " +
+                     "FROM membership m " +
+                     "INNER JOIN user u ON m.userID = u.userID " +
+                     "WHERE m.clubID = ? " +
+                     "ORDER BY m.joinDate DESC";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, clubID);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                // Create User object
+                User user = new User();
+                user.setUserID(rs.getInt("userID"));
+                user.setUserName(rs.getString("userName"));
+                user.setUserEmail(rs.getString("userEmail"));
+                user.setMatricNo(rs.getString("matricNo"));
+                user.setFaculty(rs.getString("faculty"));
+                user.setProgramme(rs.getString("programme"));
+                user.setRoleID(rs.getInt("roleID"));
+                
+                // Create Membership object
+                Membership membership = new Membership();
+                membership.setMembershipID(rs.getInt("membershipID"));
+                membership.setJoinDate(rs.getDate("joinDate").toLocalDate());
+                membership.setMembershipStatus(rs.getString("membershipStatus"));
+                membership.setUserID(rs.getInt("userID"));
+                membership.setClubID(rs.getInt("clubID"));
+                membership.setUser(user);  // Set the user object
+                
+                memberships.add(membership);
+            }
+        }
+        
+        return memberships;
+    }
+    
+    /**
+     * Delete a membership by membershipID
+     * @param membershipID The membership ID to delete
+     * @return true if successful, false otherwise
+     */
+    public boolean deleteMembership(int membershipID) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM membership WHERE membershipID = ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, membershipID);
+            int rowsAffected = pstmt.executeUpdate();
+            
+            return rowsAffected > 0;
+        }
+    }
+    
+    /**
+     * Update membership status
+     * @param membershipID The membership ID
+     * @param status The new status (Active/Inactive)
+     * @return true if successful, false otherwise
+     */
+    public boolean updateMembershipStatus(int membershipID, String status) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE membership SET membershipStatus = ? WHERE membershipID = ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, status);
+            pstmt.setInt(2, membershipID);
+            int rowsAffected = pstmt.executeUpdate();
+            
+            return rowsAffected > 0;
         }
     }
 }

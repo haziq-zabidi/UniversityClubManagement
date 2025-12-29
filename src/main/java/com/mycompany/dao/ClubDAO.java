@@ -44,6 +44,11 @@ public class ClubDAO {
         DBConnect.closeConnection(conn);
         return c;
     }
+    
+    // Alias method for getClubByID (for compatibility with controller)
+    public Club getClubById(int clubID) throws SQLException, ClassNotFoundException {
+        return getClubByID(clubID);
+    }
 
     // Get club by adminUserID
     public Club getClubByAdminUserID(int adminUserID) throws SQLException, ClassNotFoundException {
@@ -64,7 +69,6 @@ public class ClubDAO {
         return c;
     }
 
-    // --- NEW METHOD ---
     // Get all clubs where a user is a committee member
     public List<Club> getClubsByCommittee(int userID) throws SQLException, ClassNotFoundException {
         List<Club> list = new ArrayList<>();
