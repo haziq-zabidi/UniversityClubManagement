@@ -1,13 +1,13 @@
 package com.mycompany.controller;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
+import com.mycompany.dao.ClubDAO;
+import com.mycompany.model.Club;
+import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet("/committee/dashboard")
 public class CommitteeDashboardController extends HttpServlet {
@@ -17,14 +17,27 @@ public class CommitteeDashboardController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("roleID") == null ||
-            (Integer) session.getAttribute("roleID") != 3) { // roleID 3 = Committee
+
+        if (session == null || session.getAttribute("userID") == null ||
+            session.getAttribute("roleID") == null ||
+            (Integer) session.getAttribute("roleID") != 3) { // 3 = Committee
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Forward to committee dashboard JSP
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/committee/dashboard.jsp");
-        dispatcher.forward(request, response);
+        int userID = (Integer) session.getAttribute("userID");
+
+        try {
+            ClubDAO clubDAO = new ClubDAO();
+            // Only get clubs where user is committee member
+            List<Club> clubs = clubDAO.getClubsByCommittee(userID);
+
+            request.setAttribute("clubsList", clubs);
+            RequestDispatcher rd = request.getRequestDispatcher("/views/committee/dashboard.jsp");
+            rd.forward(request, response);
+
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new ServletException(e);
+        }
     }
 }

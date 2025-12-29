@@ -7,6 +7,7 @@ import java.util.List;
 
 public class ClubDAO {
 
+    // Get all clubs
     public List<Club> getAllClubs() throws SQLException, ClassNotFoundException {
         List<Club> list = new ArrayList<>();
         Connection conn = DBConnect.getConnection();
@@ -25,6 +26,7 @@ public class ClubDAO {
         return list;
     }
 
+    // Get club by clubID
     public Club getClubByID(int clubID) throws SQLException, ClassNotFoundException {
         Club c = null;
         Connection conn = DBConnect.getConnection();
@@ -43,6 +45,52 @@ public class ClubDAO {
         return c;
     }
 
+    // Get club by adminUserID
+    public Club getClubByAdminUserID(int adminUserID) throws SQLException, ClassNotFoundException {
+        Club c = null;
+        Connection conn = DBConnect.getConnection();
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM club WHERE adminUserID=?");
+        ps.setInt(1, adminUserID);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            c = new Club();
+            c.setClubID(rs.getInt("clubID"));
+            c.setClubName(rs.getString("clubName"));
+            c.setClubDescription(rs.getString("clubDescription"));
+            c.setClubCategory(rs.getString("clubCategory"));
+            c.setAdminUserID(rs.getInt("adminUserID"));
+        }
+        DBConnect.closeConnection(conn);
+        return c;
+    }
+
+    // --- NEW METHOD ---
+    // Get all clubs where a user is a committee member
+    public List<Club> getClubsByCommittee(int userID) throws SQLException, ClassNotFoundException {
+        List<Club> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM club c "
+                   + "JOIN membership m ON c.clubID = m.clubID "
+                   + "WHERE m.userID = ? AND m.membershipStatus = 'Active'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Club c = new Club();
+                    c.setClubID(rs.getInt("clubID"));
+                    c.setClubName(rs.getString("clubName"));
+                    c.setClubDescription(rs.getString("clubDescription"));
+                    c.setClubCategory(rs.getString("clubCategory"));
+                    c.setAdminUserID(rs.getInt("adminUserID"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+
+    // Add a new club
     public boolean addClub(Club c) throws SQLException, ClassNotFoundException {
         Connection conn = DBConnect.getConnection();
         PreparedStatement ps = conn.prepareStatement(
@@ -57,6 +105,7 @@ public class ClubDAO {
         return inserted;
     }
 
+    // Update club
     public boolean updateClub(Club c) throws SQLException, ClassNotFoundException {
         Connection conn = DBConnect.getConnection();
         PreparedStatement ps = conn.prepareStatement(
@@ -72,6 +121,7 @@ public class ClubDAO {
         return updated;
     }
 
+    // Delete club
     public boolean deleteClub(int clubID) throws SQLException, ClassNotFoundException {
         Connection conn = DBConnect.getConnection();
         PreparedStatement ps = conn.prepareStatement("DELETE FROM club WHERE clubID=?");
