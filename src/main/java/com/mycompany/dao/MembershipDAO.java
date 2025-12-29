@@ -4,6 +4,8 @@ import com.mycompany.model.Membership;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+
 
 public class MembershipDAO {
 
@@ -124,6 +126,24 @@ public class MembershipDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userID);
             ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // ================= NEW METHOD FOR ACTIVITY ATTENDANCE =================
+    public boolean addAttendance(int activityID, int userID, LocalDate attendanceDate, String attendanceStatus)
+            throws SQLException, ClassNotFoundException {
+
+        String sql = "INSERT INTO attendance (attendanceDate, attendanceStatus, activityID, userID) VALUES (?,?,?,?)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, java.sql.Date.valueOf(attendanceDate));
+            ps.setString(2, attendanceStatus);
+            ps.setInt(3, activityID);
+            ps.setInt(4, userID);
+
             return ps.executeUpdate() > 0;
         }
     }
