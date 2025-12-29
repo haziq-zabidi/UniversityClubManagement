@@ -1,9 +1,6 @@
 package com.mycompany.controller;
 
-import com.mycompany.dao.ActivityDAO;
 import com.mycompany.dao.AnnouncementDAO;
-import com.mycompany.dao.MembershipDAO;
-import com.mycompany.model.Activity;
 import com.mycompany.model.Announcement;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,14 +23,20 @@ public class CommitteeAnnouncementsController extends HttpServlet {
             return;
         }
 
-        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        String clubIDStr = request.getParameter("clubID");
+        if (clubIDStr == null || clubIDStr.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/committee/dashboard");
+            return;
+        }
+
+        int clubID = Integer.parseInt(clubIDStr);
+
         try {
             AnnouncementDAO announcementDAO = new AnnouncementDAO();
             List<Announcement> announcements = announcementDAO.getAnnouncementsByClub(clubID);
 
             request.setAttribute("clubID", clubID);
             request.setAttribute("announcementsList", announcements);
-
             RequestDispatcher rd = request.getRequestDispatcher("/views/committee/manageAnnouncements.jsp");
             rd.forward(request, response);
 
@@ -47,42 +50,71 @@ public class CommitteeAnnouncementsController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userID") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         int authorUserID = (Integer) session.getAttribute("userID");
-        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        String clubIDStr = request.getParameter("clubID");
         String action = request.getParameter("action");
+
+        if (clubIDStr == null || clubIDStr.isEmpty() || action == null) {
+            response.sendRedirect(request.getContextPath() + "/committee/dashboard");
+            return;
+        }
+
+        int clubID = Integer.parseInt(clubIDStr);
 
         try {
             AnnouncementDAO announcementDAO = new AnnouncementDAO();
-            ActivityDAO activityDAO = new ActivityDAO();
-            MembershipDAO membershipDAO = new MembershipDAO();
 
-            if ("createAnnouncement".equals(action)) {
-                Announcement a = new Announcement();
-                a.setAnnouncementTitle(request.getParameter("title"));
-                a.setAnnouncementMessage(request.getParameter("message"));
-                a.setPublishDate(LocalDate.now());
-                a.setClubID(clubID);
-                a.setAuthorUserID(authorUserID);
-                announcementDAO.addAnnouncement(a);
-            }
+            switch (action) {
+                case "create":
+                    String title = request.getParameter("title").trim();
+                    String message = request.getParameter("message").trim();
+                    if (!title.isEmpty() && !message.isEmpty()) {
+                        Announcement a = new Announcement();
+                        a.setAnnouncementTitle(title);
+                        a.setAnnouncementMessage(message);
+                        a.setPublishDate(LocalDate.now());
+                        a.setClubID(clubID);
+                        a.setAuthorUserID(authorUserID);
+                        announcementDAO.addAnnouncement(a);
+                    }
+                    break;
 
-            else if ("createActivity".equals(action)) {
-                Activity act = new Activity();
-                act.setActivityName(request.getParameter("activityName"));
-                act.setActivityDescription(request.getParameter("activityDescription"));
-                act.setActivityType(request.getParameter("activityType"));
-                act.setActivityLocation(request.getParameter("activityLocation"));
-                act.setStartDate(LocalDate.parse(request.getParameter("startDate")));
-                act.setEndDate(LocalDate.parse(request.getParameter("endDate")));
-                act.setMaxParticipants(Integer.parseInt(request.getParameter("maxParticipants")));
-                act.setClubID(clubID);
-                activityDAO.addActivity(act);
-            }
+                case "edit":
+                    String editIdStr = request.getParameter("announcementID");
+                    if (editIdStr != null && !editIdStr.isEmpty()) {
+                        int announcementID = Integer.parseInt(editIdStr);
+                        Announcement a = announcementDAO.getAnnouncementByID(announcementID);
+                        if (a != null) {
+                            String newTitle = request.getParameter("title").trim();
+                            String newMessage = request.getParameter("message").trim();
+                            if (!newTitle.isEmpty() && !newMessage.isEmpty()) {
+                                a.setAnnouncementTitle(newTitle);
+                                a.setAnnouncementMessage(newMessage);
+                                announcementDAO.updateAnnouncement(a);
+                            }
+                        }
+                    }
+                    break;
 
-            else if ("joinActivity".equals(action)) {
-                int activityID = Integer.parseInt(request.getParameter("activityID"));
-                int userID = Integer.parseInt(request.getParameter("userID"));
-                membershipDAO.addAttendance(activityID, userID, LocalDate.now(), "Joined");
+                case "delete":
+                    String deleteIdStr = request.getParameter("announcementID");
+                    if (deleteIdStr != null && !deleteIdStr.isEmpty()) {
+                        int announcementID = Integer.parseInt(deleteIdStr);
+                        Announcement a = announcementDAO.getAnnouncementByID(announcementID);
+                        if (a != null) {
+                            announcementDAO.deleteAnnouncement(announcementID);
+                        }
+                    }
+                    break;
+
+                default:
+                    // Unknown action
+                    break;
             }
 
             response.sendRedirect(request.getContextPath() + "/committee/manage-announcements?clubID=" + clubID);

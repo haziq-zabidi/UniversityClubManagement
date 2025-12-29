@@ -23,29 +23,7 @@ public class AnnouncementDAO {
         }
     }
 
-    // Get all announcements (admin or general use)
-    public List<Announcement> getAllAnnouncements() throws SQLException, ClassNotFoundException {
-        List<Announcement> list = new ArrayList<>();
-        String sql = "SELECT * FROM announcement ORDER BY publishDate DESC";
-        try (Connection conn = DBConnect.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Announcement a = new Announcement();
-                a.setAnnouncementID(rs.getInt("announcementID"));
-                a.setAnnouncementTitle(rs.getString("announcementTitle"));
-                a.setAnnouncementMessage(rs.getString("announcementMessage"));
-                a.setPublishDate(rs.getDate("publishDate").toLocalDate());
-                a.setClubID(rs.getInt("clubID"));
-                a.setAuthorUserID(rs.getInt("authorUserID"));
-                list.add(a);
-            }
-        }
-        return list;
-    }
-
-    // Get announcements for a specific club (committee member)
+    // Get all announcements for a specific club
     public List<Announcement> getAnnouncementsByClub(int clubID) throws SQLException, ClassNotFoundException {
         List<Announcement> list = new ArrayList<>();
         String sql = "SELECT * FROM announcement WHERE clubID=? ORDER BY publishDate DESC";
@@ -69,28 +47,27 @@ public class AnnouncementDAO {
         return list;
     }
 
-    // Get announcements created by a specific user (committee member)
-    public List<Announcement> getAnnouncementsByAuthor(int authorUserID) throws SQLException, ClassNotFoundException {
-        List<Announcement> list = new ArrayList<>();
-        String sql = "SELECT * FROM announcement WHERE authorUserID=? ORDER BY publishDate DESC";
+    // Get single announcement by ID (needed for edit)
+    public Announcement getAnnouncementByID(int announcementID) throws SQLException, ClassNotFoundException {
+        Announcement a = null;
+        String sql = "SELECT * FROM announcement WHERE announcementID=?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, authorUserID);
+            ps.setInt(1, announcementID);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Announcement a = new Announcement();
+                if (rs.next()) {
+                    a = new Announcement();
                     a.setAnnouncementID(rs.getInt("announcementID"));
                     a.setAnnouncementTitle(rs.getString("announcementTitle"));
                     a.setAnnouncementMessage(rs.getString("announcementMessage"));
                     a.setPublishDate(rs.getDate("publishDate").toLocalDate());
                     a.setClubID(rs.getInt("clubID"));
                     a.setAuthorUserID(rs.getInt("authorUserID"));
-                    list.add(a);
                 }
             }
         }
-        return list;
+        return a;
     }
 
     // Update announcement
