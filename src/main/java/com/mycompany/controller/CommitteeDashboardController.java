@@ -16,6 +16,10 @@ public class CommitteeDashboardController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Prevent Back Button Cache
+        response.setHeader("Cache-Control","no-cache, no-store, must-revalidate"); 
+        response.setHeader("Pragma","no-cache");
+        response.setDateHeader("Expires", 0);
         HttpSession session = request.getSession(false);
 
         if (session == null || session.getAttribute("userID") == null ||

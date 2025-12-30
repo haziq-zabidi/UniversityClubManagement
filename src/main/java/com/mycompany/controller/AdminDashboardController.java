@@ -15,6 +15,10 @@ public class AdminDashboardController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        // Prevent Back Button Cache
+        response.setHeader("Cache-Control","no-cache, no-store, must-revalidate"); 
+        response.setHeader("Pragma","no-cache");
+        response.setDateHeader("Expires", 0);
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("roleID") == null || 
             (Integer)session.getAttribute("roleID") != 1) {
