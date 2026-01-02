@@ -94,4 +94,110 @@ public class AnnouncementDAO {
             return ps.executeUpdate() > 0;
         }
     }
+    
+    public List<Announcement> getAllAnnouncements()
+        throws SQLException, ClassNotFoundException {
+
+    List<Announcement> list = new ArrayList<>();
+    String sql = """
+        SELECT a.*, c.clubName, u.userName
+        FROM announcement a
+        JOIN club c ON a.clubID = c.clubID
+        JOIN user u ON a.authorUserID = u.userID
+        ORDER BY a.publishDate DESC
+    """;
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            Announcement a = new Announcement();
+            a.setAnnouncementID(rs.getInt("announcementID"));
+            a.setAnnouncementTitle(rs.getString("announcementTitle"));
+            a.setAnnouncementMessage(rs.getString("announcementMessage"));
+            a.setPublishDate(rs.getDate("publishDate").toLocalDate());
+            a.setClubID(rs.getInt("clubID"));
+            a.setAuthorUserID(rs.getInt("authorUserID"));
+
+            // admin-only extra fields
+            a.setClubName(rs.getString("clubName"));
+            a.setAuthorName(rs.getString("userName"));
+
+            list.add(a);
+        }
+    }
+    return list;
+}
+
+    public Announcement getAnnouncementWithDetails(int id)
+        throws SQLException, ClassNotFoundException {
+
+    Announcement a = null;
+    String sql = """
+        SELECT a.*, c.clubName, u.userName
+        FROM announcement a
+        JOIN club c ON a.clubID = c.clubID
+        JOIN user u ON a.authorUserID = u.userID
+        WHERE a.announcementID=?
+    """;
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            a = new Announcement();
+            a.setAnnouncementID(rs.getInt("announcementID"));
+            a.setAnnouncementTitle(rs.getString("announcementTitle"));
+            a.setAnnouncementMessage(rs.getString("announcementMessage"));
+            a.setPublishDate(rs.getDate("publishDate").toLocalDate());
+            a.setClubID(rs.getInt("clubID"));
+            a.setAuthorUserID(rs.getInt("authorUserID"));
+            a.setClubName(rs.getString("clubName"));
+            a.setAuthorName(rs.getString("userName"));
+        }
+    }
+    return a;
+}
+    
+    public void adminUpdateAnnouncement(Announcement a)
+        throws SQLException, ClassNotFoundException {
+
+    String sql = """
+        UPDATE announcement
+        SET announcementTitle=?,
+            announcementMessage=?,
+            publishDate=?
+        WHERE announcementID=?
+    """;
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, a.getAnnouncementTitle());
+        ps.setString(2, a.getAnnouncementMessage());
+        ps.setDate(3, java.sql.Date.valueOf(a.getPublishDate()));
+        ps.setInt(4, a.getAnnouncementID());
+
+        ps.executeUpdate();
+    }
+}
+
+public void adminDeleteAnnouncement(int id)
+        throws SQLException, ClassNotFoundException {
+
+    String sql = "DELETE FROM announcement WHERE announcementID=?";
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, id);
+        ps.executeUpdate();
+    }
+}
+
+
 }

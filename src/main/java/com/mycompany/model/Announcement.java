@@ -17,6 +17,9 @@ public class Announcement {
     private int clubID;
     private int authorUserID;
 
+    private String clubName;
+    private String authorName;
+    
     public Announcement() {
     }
 
@@ -77,4 +80,19 @@ public class Announcement {
         this.authorUserID = authorUserID;
     }
     
+    public String getClubName() {
+        return clubName;
+    }
+    
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
 }

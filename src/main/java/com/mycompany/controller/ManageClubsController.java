@@ -2,12 +2,9 @@ package com.mycompany.controller;
 
 import com.mycompany.dao.ClubDAO;
 import com.mycompany.model.Club;
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -20,69 +17,107 @@ public class ManageClubsController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!isAdmin(request, response)) return;
+
         try {
             ClubDAO dao = new ClubDAO();
             List<Club> clubs = dao.getAllClubs();
             request.setAttribute("clubs", clubs);
 
-            // If editing, load the club
             String editID = request.getParameter("editID");
             if (editID != null) {
-                int clubID = Integer.parseInt(editID);
-                Club club = dao.getClubByID(clubID);
+                Club club = dao.getClubByID(Integer.parseInt(editID));
                 request.setAttribute("editClub", club);
             }
 
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/admin/manageClubs.jsp");
-            dispatcher.forward(request, response);
+            request.getRequestDispatcher("/views/admin/manageClubs.jsp")
+                   .forward(request, response);
 
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/admin/manageClubs.jsp");
-            dispatcher.forward(request, response);
+        } catch (Exception e) {
+            throw new ServletException(e);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        String action = request.getParameter("action");
+    if (!isAdmin(request, response)) return;
 
-        try {
-            ClubDAO dao = new ClubDAO();
+    String action = request.getParameter("action");
 
-            if ("create".equals(action)) {
-                Club club = new Club();
-                club.setClubName(request.getParameter("clubName"));
-                club.setClubDescription(request.getParameter("clubDescription"));
-                club.setClubCategory(request.getParameter("clubCategory"));
-                club.setAdminUserID(Integer.parseInt(request.getParameter("adminUserID")));
-                dao.addClub(club);
+    try {
+        ClubDAO dao = new ClubDAO();
 
-            } else if ("update".equals(action)) {
-                Club club = new Club();
-                club.setClubID(Integer.parseInt(request.getParameter("clubID")));
-                club.setClubName(request.getParameter("clubName"));
-                club.setClubDescription(request.getParameter("clubDescription"));
-                club.setClubCategory(request.getParameter("clubCategory"));
-                club.setAdminUserID(Integer.parseInt(request.getParameter("adminUserID")));
-                dao.updateClub(club);
+        if ("create".equals(action)) {
 
-            } else if ("delete".equals(action)) {
-                int clubID = Integer.parseInt(request.getParameter("clubID"));
-                dao.deleteClub(clubID);
+            Club club = new Club();
+            club.setClubName(request.getParameter("clubName"));
+            club.setClubDescription(request.getParameter("clubDescription"));
+            club.setClubCategory(request.getParameter("clubCategory"));
+
+            // ✅ DO NOT parse adminUserID from request
+            club.setAdminUserID(1); // or from session
+
+            dao.addClub(club);
+
+        } else if ("update".equals(action)) {
+
+            String clubIDParam = request.getParameter("clubID");
+            if (clubIDParam == null) {
+                throw new ServletException("Missing clubID for update");
             }
 
-            // Redirect back to manage-clubs page
-            response.sendRedirect(request.getContextPath() + "/admin/manage-clubs");
+            Club club = new Club();
+            club.setClubID(Integer.parseInt(clubIDParam));
+            club.setClubName(request.getParameter("clubName"));
+            club.setClubDescription(request.getParameter("clubDescription"));
+            club.setClubCategory(request.getParameter("clubCategory"));
+            club.setAdminUserID(1);
 
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/admin/manageClubs.jsp");
-            dispatcher.forward(request, response);
+            dao.updateClub(club);
+
+        } else if ("delete".equals(action)) {
+
+            String clubIDParam = request.getParameter("clubID");
+            if (clubIDParam == null) {
+                throw new ServletException("Missing clubID for delete");
+            }
+
+            dao.deleteClub(Integer.parseInt(clubIDParam));
         }
+
+        response.sendRedirect(request.getContextPath() + "/admin/manage-clubs");
+
+    } catch (Exception e) {
+        throw new ServletException(e);
+    }
+}
+
+
+    private Club buildClubFromRequest(HttpServletRequest request) {
+        Club club = new Club();
+        club.setClubName(request.getParameter("clubName"));
+        club.setClubDescription(request.getParameter("clubDescription"));
+        club.setClubCategory(request.getParameter("clubCategory"));
+
+        // ✅ ADMIN controls ownership
+        club.setAdminUserID(1); // or get from session if needed
+
+        return club;
+    }
+
+    private boolean isAdmin(HttpServletRequest r, HttpServletResponse s)
+            throws IOException {
+
+        HttpSession session = r.getSession(false);
+        if (session == null ||
+            session.getAttribute("roleID") == null ||
+            (Integer) session.getAttribute("roleID") != 1) {
+
+            s.sendRedirect(r.getContextPath() + "/login");
+            return false;
+        }
+        return true;
     }
 }
