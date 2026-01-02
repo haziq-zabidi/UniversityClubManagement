@@ -1,102 +1,164 @@
 package com.mycompany.dao;
 
 import com.mycompany.model.Attendance;
-import java.sql.*;
+import com.mycompany.model.User;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class AttendanceDAO {
 
-    // Record attendance
     public boolean addAttendance(Attendance a) throws SQLException, ClassNotFoundException {
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement(
-            "INSERT INTO attendance (attendanceDate, attendanceStatus, activityID, userID) VALUES (?,?,?,?)"
-        );
-        ps.setDate(1, Date.valueOf(a.getAttendanceDate()));
-        ps.setString(2, a.getAttendanceStatus());
-        ps.setInt(3, a.getActivityID());
-        ps.setInt(4, a.getUserID());
-        boolean inserted = ps.executeUpdate() > 0;
-        DBConnect.closeConnection(conn);
-        return inserted;
+        String sql = """
+            INSERT INTO attendance (attendanceDate, attendanceStatus, activityID, userID)
+            VALUES (?, ?, ?, ?)
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(a.getAttendanceDate()));
+            ps.setString(2, a.getAttendanceStatus());
+            ps.setInt(3, a.getActivityID());
+            ps.setInt(4, a.getUserID());
+
+            return ps.executeUpdate() > 0;
+        }
     }
 
-    // Get attendance by activity
-    public List<Attendance> getAttendanceByActivity(int activityID) throws SQLException, ClassNotFoundException {
-        List<Attendance> list = new ArrayList<>();
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM attendance WHERE activityID=?");
+    public List<Attendance> getAttendancesByActivity(int activityID)
+        throws SQLException, ClassNotFoundException {
+
+    List<Attendance> attendances = new ArrayList<>();
+
+    String sql = """
+        SELECT
+            a.attendanceID,
+            a.attendanceDate,
+            a.attendanceStatus,
+            a.activityID,
+            u.userID,
+            u.userName,
+            u.userEmail,
+            u.matricNo,
+            u.faculty,
+            u.programme
+        FROM attendance a
+        JOIN `user` u ON a.userID = u.userID
+        WHERE a.activityID = ?
+        ORDER BY a.attendanceDate DESC
+    """;
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
         ps.setInt(1, activityID);
         ResultSet rs = ps.executeQuery();
+
         while (rs.next()) {
-            Attendance a = new Attendance();
-            a.setAttendanceID(rs.getInt("attendanceID"));
-            a.setAttendanceDate(rs.getDate("attendanceDate").toLocalDate());
-            a.setAttendanceStatus(rs.getString("attendanceStatus"));
-            a.setActivityID(rs.getInt("activityID"));
-            a.setUserID(rs.getInt("userID"));
-            list.add(a);
+            Attendance attendance = new Attendance();
+            attendance.setAttendanceID(rs.getInt("attendanceID"));
+
+            Date d = rs.getDate("attendanceDate");
+            attendance.setAttendanceDate(d != null ? d.toLocalDate() : null);
+
+            attendance.setAttendanceStatus(rs.getString("attendanceStatus"));
+            attendance.setActivityID(rs.getInt("activityID"));
+
+            User user = new User();
+            user.setUserID(rs.getInt("userID"));
+            user.setUserName(rs.getString("userName"));
+            user.setUserEmail(rs.getString("userEmail"));
+            user.setMatricNo(rs.getString("matricNo"));
+            user.setFaculty(rs.getString("faculty"));
+            user.setProgramme(rs.getString("programme"));
+
+            attendance.setUser(user);
+            attendances.add(attendance);
         }
-        DBConnect.closeConnection(conn);
+    }
+
+    return attendances;
+}
+
+
+    public List<Attendance> getAttendanceByUser(int userID)
+            throws SQLException, ClassNotFoundException {
+
+        List<Attendance> list = new ArrayList<>();
+        String sql = "SELECT * FROM attendance WHERE userID = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Attendance a = new Attendance();
+                a.setAttendanceID(rs.getInt("attendanceID"));
+
+                Date d = rs.getDate("attendanceDate");
+                a.setAttendanceDate(d != null ? d.toLocalDate() : null);
+
+                a.setAttendanceStatus(rs.getString("attendanceStatus"));
+                a.setActivityID(rs.getInt("activityID"));
+                a.setUserID(rs.getInt("userID"));
+                list.add(a);
+            }
+        }
+
         return list;
     }
 
-    // Get attendance by user
-    public List<Attendance> getAttendanceByUser(int userID) throws SQLException, ClassNotFoundException {
-        List<Attendance> list = new ArrayList<>();
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement("SELECT * FROM attendance WHERE userID=?");
-        ps.setInt(1, userID);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Attendance a = new Attendance();
-            a.setAttendanceID(rs.getInt("attendanceID"));
-            a.setAttendanceDate(rs.getDate("attendanceDate").toLocalDate());
-            a.setAttendanceStatus(rs.getString("attendanceStatus"));
-            a.setActivityID(rs.getInt("activityID"));
-            a.setUserID(rs.getInt("userID"));
-            list.add(a);
+    public boolean hasUserAttendanceForActivity(int userID, int activityID)
+            throws SQLException, ClassNotFoundException {
+
+        String sql = """
+            SELECT 1 FROM attendance
+            WHERE userID = ? AND activityID = ?
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userID);
+            ps.setInt(2, activityID);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
         }
-        DBConnect.closeConnection(conn);
-        return list;
     }
-    
-    // Check if user has attendance for specific activity
-    public boolean hasUserAttendanceForActivity(int userID, int activityID) throws SQLException, ClassNotFoundException {
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement("SELECT attendanceID FROM attendance WHERE userID=? AND activityID=?");
-        ps.setInt(1, userID);
-        ps.setInt(2, activityID);
-        ResultSet rs = ps.executeQuery();
-        boolean hasAttendance = rs.next();
-        DBConnect.closeConnection(conn);
-        return hasAttendance;
-    }
-    
-    // Remove attendance record
-    public boolean removeAttendance(int userID, int activityID) throws SQLException, ClassNotFoundException {
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement("DELETE FROM attendance WHERE userID=? AND activityID=?");
-        ps.setInt(1, userID);
-        ps.setInt(2, activityID);
-        boolean deleted = ps.executeUpdate() > 0;
-        DBConnect.closeConnection(conn);
-        return deleted;
-    }
-    
-    // Get attendance count for activity
-    public int getAttendanceCountForActivity(int activityID) throws SQLException, ClassNotFoundException {
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) as count FROM attendance WHERE activityID=?");
-        ps.setInt(1, activityID);
-        ResultSet rs = ps.executeQuery();
-        int count = 0;
-        if (rs.next()) {
-            count = rs.getInt("count");
+
+    public boolean removeAttendance(int userID, int activityID)
+            throws SQLException, ClassNotFoundException {
+
+        String sql = "DELETE FROM attendance WHERE userID = ? AND activityID = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userID);
+            ps.setInt(2, activityID);
+            return ps.executeUpdate() > 0;
         }
-        DBConnect.closeConnection(conn);
-        return count;
+    }
+
+    public int getParticipantCount(int activityID)
+            throws SQLException, ClassNotFoundException {
+
+        String sql = "SELECT COUNT(*) FROM attendance WHERE activityID = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, activityID);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        }
     }
 }
