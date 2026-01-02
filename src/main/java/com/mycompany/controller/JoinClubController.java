@@ -25,7 +25,18 @@ public class JoinClubController extends HttpServlet{
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         
+        // Prevent Back Button Cache
+        response.setHeader("Cache-Control","no-cache, no-store, must-revalidate"); 
+        response.setHeader("Pragma","no-cache");
+        response.setDateHeader("Expires", 0);
         HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("roleID") == null || 
+            (Integer)session.getAttribute("roleID") != 1) {
+            // Not logged in or not admin → redirect to login
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
         if (session == null || session.getAttribute("userID") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
