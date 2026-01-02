@@ -95,4 +95,73 @@ public class UsersDAO {
         DBConnect.closeConnection(conn);
         return deleted;
     }
+    
+    // Get user by ID
+    public User getUserByID(int userID) throws SQLException, ClassNotFoundException {
+        User user = null;
+        String sql = "SELECT * FROM user WHERE userID = ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = new User();
+                    user.setUserID(rs.getInt("userID"));
+                    user.setUserName(rs.getString("userName"));
+                    user.setUserEmail(rs.getString("userEmail"));
+                    user.setUserPassword(rs.getString("userPassword"));
+                    user.setMatricNo(rs.getString("matricNo"));
+                    user.setFaculty(rs.getString("faculty"));
+                    user.setProgramme(rs.getString("programme"));
+                }
+            }
+        }
+        return user;
+    }
+    
+    // Update user profile (without password)
+    public boolean updateUserProfile(User user) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE user SET userName = ?, userEmail = ?, matricNo = ?, " +
+                     "faculty = ?, programme = ? WHERE userID = ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getUserName());
+            ps.setString(2, user.getUserEmail());
+            ps.setString(3, user.getMatricNo());
+            ps.setString(4, user.getFaculty());
+            ps.setString(5, user.getProgramme());
+            ps.setInt(6, user.getUserID());
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Update password
+    public boolean updatePassword(int userID, String newPassword) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE user SET userPassword = ? WHERE userID = ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setInt(2, userID);
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Check if email already exists (for other users)
+    public boolean isEmailExists(String email, int excludeUserID) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM user WHERE userEmail = ? AND userID != ?";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setInt(2, excludeUserID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
 }

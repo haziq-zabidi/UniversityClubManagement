@@ -54,7 +54,6 @@
                         <p><strong>Description:</strong> ${club.clubDescription}</p>
                         <p><strong>Status:</strong> <span style="color: #4CAF50;">Active Member</span></p>
                         <p>
-                            <a href="${pageContext.request.contextPath}/user/club/${club.clubID}">View Club Details</a> | 
                             <a href="${pageContext.request.contextPath}/user/leave-club?clubID=${club.clubID}" 
                                onclick="return confirm('Request to leave ${club.clubName}? This requires committee approval.')"
                                style="color: red;">
@@ -111,7 +110,10 @@
         </c:choose>
 
         <hr/>
-        <a href="${pageContext.request.contextPath}/user/dashboard">← Back to Dashboard</a>
+        <a href="${pageContext.request.contextPath}/user/dashboard">← Dashboard</a>
+        <a href="${pageContext.request.contextPath}/user/announcements">← Announcement</a>
+        <a href="${pageContext.request.contextPath}/user/profile">← Profile</a>
+        <a href="${pageContext.request.contextPath}/user/clubs">← Clubs</a>
 
         <script>
             // Auto-hide messages after 5 seconds

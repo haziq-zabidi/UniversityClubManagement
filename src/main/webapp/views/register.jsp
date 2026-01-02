@@ -12,13 +12,15 @@
         <title>Register Page</title>
     </head>
     <body>
-        <form method="POST" action="register">
+        <form method="POST" action="register" id="registerForm">
             <label>username</label>
             <input type="text" name="userName" required>
             <label>email</label>
             <input type="email" name="userEmail" required>
             <label>password</label>
-            <input type="password" name="userPassword" required>
+            <input type="password" name="userPassword" id="password" required>
+            <label>re-enter password</label>
+            <input type="password" name="confirmPassword" id="confirmPassword" required>
             <label>matric no.</label>
             <input type="number" name="matricNo" required>
             <label>faculty</label>
@@ -31,5 +33,26 @@
             <a href="">login</a>
             <input type="submit">
         </form>
+        
+        <script>
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                var password = document.getElementById('password').value;
+                var confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password.length < 8) {
+                    e.preventDefault();
+                    alert('Password must be at least 8 characters long!');
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    return false;
+                }
+                
+                return true;
+            });
+        </script>
     </body>
 </html>

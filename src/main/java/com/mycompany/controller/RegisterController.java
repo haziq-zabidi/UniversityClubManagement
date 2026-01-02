@@ -42,13 +42,6 @@ public class RegisterController extends HttpServlet{
         request.setAttribute("faculty", faculty);
         request.setAttribute("programme", programme);
         
-        if (userPassword.length() < 8) {
-            request.setAttribute("errorMessage", "Password must be at least 8 characters!");
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/register.jsp");
-            dispatcher.forward(request, response);
-            return;
-        }
-        
         try {
             // Step 1: Check if email already exists
             UsersDAO usersDAO = new UsersDAO();

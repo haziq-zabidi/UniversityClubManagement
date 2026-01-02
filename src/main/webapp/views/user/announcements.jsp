@@ -87,6 +87,9 @@
         </c:choose>
 
         <hr/>
-        <a href="${pageContext.request.contextPath}/user/dashboard">← Back to Dashboard</a>
+        <a href="${pageContext.request.contextPath}/user/dashboard">← Dashboard</a>
+        <a href="${pageContext.request.contextPath}/user/announcements">← Announcement</a>
+        <a href="${pageContext.request.contextPath}/user/profile">← Profile</a>
+        <a href="${pageContext.request.contextPath}/user/clubs">← Clubs</a>
     </body>
 </html>
