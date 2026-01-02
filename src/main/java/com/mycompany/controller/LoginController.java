@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.controller;
 
 import com.mycompany.dao.UsersDAO;
@@ -16,75 +12,72 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
- *
- * @author TUF
- */
 @WebServlet("/login")
-public class LoginController extends HttpServlet{
+public class LoginController extends HttpServlet {
+
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/login.jsp"); 
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Show login page
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/login.jsp");
         dispatcher.forward(request, response);
     }
-    
+
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String email = request.getParameter("userEmail");
-        String password = request.getParameter("userPassword");
-        
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // Trim inputs
+        String email = request.getParameter("userEmail").trim();
+        String password = request.getParameter("userPassword").trim();
+
         request.setAttribute("userEmail", email);
-        
-        if (email == null || email.trim().isEmpty() || 
-            password == null || password.trim().isEmpty()) {
-            
+
+        // Check empty fields
+        if (email.isEmpty() || password.isEmpty()) {
             request.setAttribute("errorMessage", "Email and password are required!");
             RequestDispatcher dispatcher = request.getRequestDispatcher("/views/login.jsp");
             dispatcher.forward(request, response);
             return;
         }
-        
+
         try {
             UsersDAO usersDAO = new UsersDAO();
             User user = usersDAO.getUserByEmail(email);
-            
+
             if (user != null && user.getUserPassword().equals(password)) {
+
+                // Create session
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
                 session.setAttribute("userName", user.getUserName());
                 session.setAttribute("userEmail", user.getUserEmail());
                 session.setAttribute("userID", user.getUserID());
                 session.setAttribute("roleID", user.getRoleID());
-                
-                // Set session timeout (30 minutes = 1800 seconds)
+
+                // Set session timeout (30 minutes)
                 session.setMaxInactiveInterval(1800);
-                
-                // Redirect based on role (example)
-                if (user.getRoleID() == 1) {
-                    // Admin role
-                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-                } else if (user.getRoleID() == 2) {
-                    // Student role
-                    response.sendRedirect(request.getContextPath() + "/user/dashboard");
-                } else {
-                    // Committee role
-                    response.sendRedirect(request.getContextPath() + "/committee/dashboard");
+
+                // Redirect based on role
+                switch (user.getRoleID()) {
+                    case 1 -> response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                    case 2 -> response.sendRedirect(request.getContextPath() + "/user/dashboard");
+                    case 3 -> response.sendRedirect(request.getContextPath() + "/committee/dashboard");
+                    default -> response.sendRedirect(request.getContextPath() + "/login");
                 }
-                
+
             } else {
                 // Invalid credentials
                 request.setAttribute("errorMessage", "Invalid email or password!");
                 RequestDispatcher dispatcher = request.getRequestDispatcher("/views/login.jsp");
                 dispatcher.forward(request, response);
             }
-            
+
         } catch (SQLException | ClassNotFoundException e) {
-            // Handle database errors
             e.printStackTrace();
             request.setAttribute("errorMessage", "Database error occurred. Please try again later.");
             RequestDispatcher dispatcher = request.getRequestDispatcher("/views/login.jsp");
             dispatcher.forward(request, response);
         }
     }
-        
 }
