@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @WebServlet("/committee/manage-members")
 public class CommitteeMembersController extends HttpServlet {
@@ -32,9 +32,14 @@ public class CommitteeMembersController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        // Prevent caching
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+        
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
@@ -42,7 +47,7 @@ public class CommitteeMembersController extends HttpServlet {
         
         // Verify user is committee member (roleID = 3)
         if (currentUser.getRoleID() != 3) {
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/user/dashboard");
             return;
         }
         
@@ -85,11 +90,26 @@ public class CommitteeMembersController extends HttpServlet {
         // Get club details
         Club club = clubDAO.getClubById(clubID);
         
-        // Get members with their membership details
-        List<Membership> memberships = membershipDAO.getMembershipsByClub(clubID);
+        // Get ALL members with their membership details
+        List<Membership> allMemberships = membershipDAO.getMembershipsByClub(clubID);
+        
+        // Separate active members, pending join requests, and pending leave requests
+        List<Membership> activeMembers = allMemberships.stream()
+            .filter(m -> "Active".equalsIgnoreCase(m.getMembershipStatus()))
+            .collect(Collectors.toList());
+            
+        List<Membership> pendingJoinRequests = allMemberships.stream()
+            .filter(m -> "Pending".equalsIgnoreCase(m.getMembershipStatus()))
+            .collect(Collectors.toList());
+        
+        List<Membership> pendingLeaveRequests = allMemberships.stream()
+            .filter(m -> "Pending Leave".equalsIgnoreCase(m.getMembershipStatus()))
+            .collect(Collectors.toList());
         
         request.setAttribute("club", club);
-        request.setAttribute("memberships", memberships);
+        request.setAttribute("activeMembers", activeMembers);
+        request.setAttribute("pendingJoinRequests", pendingJoinRequests);
+        request.setAttribute("pendingLeaveRequests", pendingLeaveRequests);
         request.setAttribute("clubID", clubID);
         request.getRequestDispatcher("/views/committee/manageMembers.jsp")
                .forward(request, response);
@@ -101,14 +121,14 @@ public class CommitteeMembersController extends HttpServlet {
         
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
         User currentUser = (User) session.getAttribute("user");
         
         if (currentUser.getRoleID() != 3) {
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/user/dashboard");
             return;
         }
         
@@ -119,12 +139,148 @@ public class CommitteeMembersController extends HttpServlet {
                 removeMember(request, response, currentUser);
             } else if ("updateStatus".equals(action)) {
                 updateMemberStatus(request, response, currentUser);
+            } else if ("approve".equals(action)) {
+                approveMember(request, response, currentUser);
+            } else if ("reject".equals(action)) {
+                rejectMember(request, response, currentUser);
+            } else if ("approveLeave".equals(action)) {
+                approveLeaveRequest(request, response, currentUser);
+            } else if ("rejectLeave".equals(action)) {
+                rejectLeaveRequest(request, response, currentUser);
             }
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             doGet(request, response);
         }
+    }
+    
+    private void approveMember(HttpServletRequest request, HttpServletResponse response, 
+                              User currentUser) 
+            throws SQLException, ClassNotFoundException, IOException, ServletException {
+        
+        int membershipID = Integer.parseInt(request.getParameter("membershipID"));
+        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        
+        // Verify committee has access to this club
+        List<Club> managedClubs = clubDAO.getClubsByCommittee(currentUser.getUserID());
+        boolean hasAccess = managedClubs.stream()
+                                       .anyMatch(club -> club.getClubID() == clubID);
+        
+        if (!hasAccess) {
+            request.getSession().setAttribute("errorMessage", "Access denied");
+            response.sendRedirect(request.getContextPath() + 
+                                "/committee/manage-members?action=view&clubID=" + clubID);
+            return;
+        }
+        
+        // Update status to Active
+        boolean success = membershipDAO.updateMembershipStatus(membershipID, "Active");
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Member approved successfully!");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to approve member");
+        }
+        
+        response.sendRedirect(request.getContextPath() + 
+                            "/committee/manage-members?action=view&clubID=" + clubID);
+    }
+    
+    private void rejectMember(HttpServletRequest request, HttpServletResponse response, 
+                             User currentUser) 
+            throws SQLException, ClassNotFoundException, IOException, ServletException {
+        
+        int membershipID = Integer.parseInt(request.getParameter("membershipID"));
+        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        
+        // Verify committee has access to this club
+        List<Club> managedClubs = clubDAO.getClubsByCommittee(currentUser.getUserID());
+        boolean hasAccess = managedClubs.stream()
+                                       .anyMatch(club -> club.getClubID() == clubID);
+        
+        if (!hasAccess) {
+            request.getSession().setAttribute("errorMessage", "Access denied");
+            response.sendRedirect(request.getContextPath() + 
+                                "/committee/manage-members?action=view&clubID=" + clubID);
+            return;
+        }
+        
+        // Delete the membership request
+        boolean success = membershipDAO.deleteMembership(membershipID);
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Join request rejected");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to reject request");
+        }
+        
+        response.sendRedirect(request.getContextPath() + 
+                            "/committee/manage-members?action=view&clubID=" + clubID);
+    }
+    
+    private void approveLeaveRequest(HttpServletRequest request, HttpServletResponse response, 
+                                    User currentUser) 
+            throws SQLException, ClassNotFoundException, IOException, ServletException {
+        
+        int membershipID = Integer.parseInt(request.getParameter("membershipID"));
+        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        
+        // Verify committee has access to this club
+        List<Club> managedClubs = clubDAO.getClubsByCommittee(currentUser.getUserID());
+        boolean hasAccess = managedClubs.stream()
+                                       .anyMatch(club -> club.getClubID() == clubID);
+        
+        if (!hasAccess) {
+            request.getSession().setAttribute("errorMessage", "Access denied");
+            response.sendRedirect(request.getContextPath() + 
+                                "/committee/manage-members?action=view&clubID=" + clubID);
+            return;
+        }
+        
+        // Delete the membership (approve leave = remove from club)
+        boolean success = membershipDAO.deleteMembership(membershipID);
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Leave request approved - member removed from club");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to approve leave request");
+        }
+        
+        response.sendRedirect(request.getContextPath() + 
+                            "/committee/manage-members?action=view&clubID=" + clubID);
+    }
+    
+    private void rejectLeaveRequest(HttpServletRequest request, HttpServletResponse response, 
+                                   User currentUser) 
+            throws SQLException, ClassNotFoundException, IOException, ServletException {
+        
+        int membershipID = Integer.parseInt(request.getParameter("membershipID"));
+        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        
+        // Verify committee has access to this club
+        List<Club> managedClubs = clubDAO.getClubsByCommittee(currentUser.getUserID());
+        boolean hasAccess = managedClubs.stream()
+                                       .anyMatch(club -> club.getClubID() == clubID);
+        
+        if (!hasAccess) {
+            request.getSession().setAttribute("errorMessage", "Access denied");
+            response.sendRedirect(request.getContextPath() + 
+                                "/committee/manage-members?action=view&clubID=" + clubID);
+            return;
+        }
+        
+        // Reject leave = set status back to Active
+        boolean success = membershipDAO.updateMembershipStatus(membershipID, "Active");
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Leave request rejected - member remains in club");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to reject leave request");
+        }
+        
+        response.sendRedirect(request.getContextPath() + 
+                            "/committee/manage-members?action=view&clubID=" + clubID);
     }
     
     private void removeMember(HttpServletRequest request, HttpServletResponse response, 
@@ -140,7 +296,7 @@ public class CommitteeMembersController extends HttpServlet {
                                        .anyMatch(club -> club.getClubID() == clubID);
         
         if (!hasAccess) {
-            request.setAttribute("errorMessage", "Access denied");
+            request.getSession().setAttribute("errorMessage", "Access denied");
             response.sendRedirect(request.getContextPath() + 
                                 "/committee/manage-members?action=view&clubID=" + clubID);
             return;
@@ -172,7 +328,7 @@ public class CommitteeMembersController extends HttpServlet {
                                        .anyMatch(club -> club.getClubID() == clubID);
         
         if (!hasAccess) {
-            request.setAttribute("errorMessage", "Access denied");
+            request.getSession().setAttribute("errorMessage", "Access denied");
             response.sendRedirect(request.getContextPath() + 
                                 "/committee/manage-members?action=view&clubID=" + clubID);
             return;

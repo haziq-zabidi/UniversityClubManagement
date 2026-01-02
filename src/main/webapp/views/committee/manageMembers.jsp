@@ -1,229 +1,219 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manage Members - Committee Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .message {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .btn {
-            padding: 8px 16px;
-            margin: 2px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            color: black;
-        }
-        .btn-back {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn:hover {
-            opacity: 0.8;
-        }
-        .club-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
-        .status-active {
-            color: green;
-            font-weight: bold;
-        }
-        .status-inactive {
-            color: red;
-            font-weight: bold;
-        }
-        select {
-            padding: 5px;
-            border-radius: 4px;
-        }
-    </style>
-    <script>
-        function confirmRemove(memberName) {
-            return confirm("Are you sure you want to remove " + memberName + " from this club?");
-        }
-    </script>
+    <title>Manage Members</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Manage Club Members</h1>
+<div class="container mt-5">
+    <h2>Manage Club Members</h2>
+    
+    <!-- Success/Error Messages -->
+    <c:if test="${not empty successMessage}">
+        <div class="alert alert-success alert-dismissible fade show">
+            ${successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% session.removeAttribute("successMessage"); %>
+    </c:if>
+    
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger alert-dismissible fade show">
+            ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% session.removeAttribute("errorMessage"); %>
+    </c:if>
+    
+    <!-- If viewing specific club -->
+    <c:if test="${not empty club}">
+        <h3 class="mb-4">${club.clubName}</h3>
         
-        <!-- Success/Error Messages -->
-        <c:if test="${not empty sessionScope.successMessage}">
-            <div class="message success">
-                ${sessionScope.successMessage}
+        <!-- Pending Join Requests -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Pending Join Requests (${fn:length(pendingJoinRequests)})</h5>
             </div>
-            <c:remove var="successMessage" scope="session"/>
-        </c:if>
-        
-        <c:if test="${not empty sessionScope.errorMessage}">
-            <div class="message error">
-                ${sessionScope.errorMessage}
-            </div>
-            <c:remove var="errorMessage" scope="session"/>
-        </c:if>
-        
-        <c:if test="${not empty errorMessage}">
-            <div class="message error">
-                ${errorMessage}
-            </div>
-        </c:if>
-        
-        <!-- Club Selection View -->
-        <c:if test="${empty club}">
-            <h2>Select a Club to Manage</h2>
-            
-            <c:if test="${empty clubs}">
-                <p>You are not managing any clubs currently.</p>
-            </c:if>
-            
-            <c:forEach var="club" items="${clubs}">
-                <div class="club-card">
-                    <h3>${club.clubName}</h3>
-                    <p>${club.clubDescription}</p>
-                    <p><strong>Category:</strong> ${club.clubCategory}</p>
-                    <a href="${pageContext.request.contextPath}/committee/manage-members?action=view&clubID=${club.clubID}" 
-                       class="btn btn-primary">Manage Members</a>
-                </div>
-            </c:forEach>
-            
-            <br><br>
-            <a href="${pageContext.request.contextPath}/committee/dashboard" class="btn btn-back">Back to Dashboard</a>
-        </c:if>
-        
-        <!-- Members List View -->
-        <c:if test="${not empty club}">
-            <h2>Members of ${club.clubName}</h2>
-            <p><strong>Category:</strong> ${club.clubCategory}</p>
-            <p><strong>Description:</strong> ${club.clubDescription}</p>
-            
-            <br>
-            
-            <c:if test="${empty memberships}">
-                <p>No members in this club yet.</p>
-            </c:if>
-            
-            <c:if test="${not empty memberships}">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Member ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Matric No</th>
-                            <th>Faculty</th>
-                            <th>Programme</th>
-                            <th>Join Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="membership" items="${memberships}">
+            <div class="card-body">
+                <c:if test="${not empty pendingJoinRequests}">
+                    <table class="table table-hover">
+                        <thead>
                             <tr>
-                                <td>${membership.user.userID}</td>
-                                <td>${membership.user.userName}</td>
-                                <td>${membership.user.userEmail}</td>
-                                <td>${membership.user.matricNo}</td>
-                                <td>${membership.user.faculty}</td>
-                                <td>${membership.user.programme}</td>
-                                <td>${membership.joinDate}</td>
-                                <td>
-                                    <span class="${membership.membershipStatus == 'Active' ? 'status-active' : 'status-inactive'}">
-                                        ${membership.membershipStatus}
-                                    </span>
-                                </td>
-                                <td>
-                                    <!-- Update Status Form -->
-                                    <form method="post" action="${pageContext.request.contextPath}/committee/manage-members" style="display: inline;">
-                                        <input type="hidden" name="action" value="updateStatus">
-                                        <input type="hidden" name="membershipID" value="${membership.membershipID}">
-                                        <input type="hidden" name="clubID" value="${clubID}">
-                                        <select name="status" onchange="this.form.submit()">
-                                            <option value="Active" ${membership.membershipStatus == 'Active' ? 'selected' : ''}>Active</option>
-                                            <option value="Inactive" ${membership.membershipStatus == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                                        </select>
-                                    </form>
-                                    
-                                    <!-- Remove Member Form -->
-                                    <form method="post" action="${pageContext.request.contextPath}/committee/manage-members" 
-                                          style="display: inline;" 
-                                          onsubmit="return confirmRemove('${membership.user.userName}')">
-                                        <input type="hidden" name="action" value="remove">
-                                        <input type="hidden" name="membershipID" value="${membership.membershipID}">
-                                        <input type="hidden" name="clubID" value="${clubID}">
-                                        <button type="submit" class="btn btn-danger">Remove</button>
-                                    </form>
-                                </td>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Matric No</th>
+                                <th>Faculty</th>
+                                <th>Request Date</th>
+                                <th>Actions</th>
                             </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
-                
-                <p><strong>Total Members:</strong> ${memberships.size()}</p>
-            </c:if>
-            
-            <br>
-            <a href="${pageContext.request.contextPath}/committee/manage-members" class="btn btn-back">Back to Club Selection</a>
-            <a href="${pageContext.request.contextPath}/committee/dashboard" class="btn btn-back">Back to Dashboard</a>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${pendingJoinRequests}" var="membership">
+                                <tr>
+                                    <td>${membership.user.userName}</td>
+                                    <td>${membership.user.userEmail}</td>
+                                    <td>${membership.user.matricNo}</td>
+                                    <td>${membership.user.faculty}</td>
+                                    <td>${membership.joinDate}</td>
+                                    <td>
+                                        <form action="${pageContext.request.contextPath}/committee/manage-members" method="post" style="display:inline;">
+                                            <input type="hidden" name="action" value="approve">
+                                            <input type="hidden" name="membershipID" value="${membership.membershipID}">
+                                            <input type="hidden" name="clubID" value="${clubID}">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                ✓ Approve
+                                            </button>
+                                        </form>
+                                        <form action="${pageContext.request.contextPath}/committee/manage-members" method="post" style="display:inline;">
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="hidden" name="membershipID" value="${membership.membershipID}">
+                                            <input type="hidden" name="clubID" value="${clubID}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                ✗ Reject
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:if>
+                <c:if test="${empty pendingJoinRequests}">
+                    <p class="text-muted">No pending join requests</p>
+                </c:if>
+            </div>
+        </div>
+        
+        <!-- Pending Leave Requests -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Pending Leave Requests (${fn:length(pendingLeaveRequests)})</h5>
+            </div>
+            <div class="card-body">
+                <c:if test="${not empty pendingLeaveRequests}">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Matric No</th>
+                                <th>Faculty</th>
+                                <th>Member Since</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${pendingLeaveRequests}" var="membership">
+                                <tr>
+                                    <td>${membership.user.userName}</td>
+                                    <td>${membership.user.userEmail}</td>
+                                    <td>${membership.user.matricNo}</td>
+                                    <td>${membership.user.faculty}</td>
+                                    <td>${membership.joinDate}</td>
+                                    <td>
+                                        <form action="${pageContext.request.contextPath}/committee/manage-members" method="post" style="display:inline;" onsubmit="return confirm('Approve this leave request? Member will be removed from the club.');">
+                                            <input type="hidden" name="action" value="approveLeave">
+                                            <input type="hidden" name="membershipID" value="${membership.membershipID}">
+                                            <input type="hidden" name="clubID" value="${clubID}">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                ✓ Approve Leave
+                                            </button>
+                                        </form>
+                                        <form action="${pageContext.request.contextPath}/committee/manage-members" method="post" style="display:inline;">
+                                            <input type="hidden" name="action" value="rejectLeave">
+                                            <input type="hidden" name="membershipID" value="${membership.membershipID}">
+                                            <input type="hidden" name="clubID" value="${clubID}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                ✗ Reject Leave
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:if>
+                <c:if test="${empty pendingLeaveRequests}">
+                    <p class="text-muted">No pending leave requests</p>
+                </c:if>
+            </div>
+        </div>
+        
+        <!-- Active Members -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Active Members (${fn:length(activeMembers)})</h5>
+            </div>
+            <div class="card-body">
+                <c:if test="${not empty activeMembers}">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Matric No</th>
+                                <th>Faculty</th>
+                                <th>Join Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${activeMembers}" var="membership">
+                                <tr>
+                                    <td>${membership.user.userName}</td>
+                                    <td>${membership.user.userEmail}</td>
+                                    <td>${membership.user.matricNo}</td>
+                                    <td>${membership.user.faculty}</td>
+                                    <td>${membership.joinDate}</td>
+                                    <td>
+                                        <form action="${pageContext.request.contextPath}/committee/manage-members" method="post" onsubmit="return confirm('Remove this member from the club?');">
+                                            <input type="hidden" name="action" value="remove">
+                                            <input type="hidden" name="membershipID" value="${membership.membershipID}">
+                                            <input type="hidden" name="clubID" value="${clubID}">
+                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:if>
+                <c:if test="${empty activeMembers}">
+                    <p class="text-muted">No active members yet</p>
+                </c:if>
+            </div>
+        </div>
+        
+        <a href="${pageContext.request.contextPath}/committee/manage-members" class="btn btn-secondary mt-3">
+            ← Back to Club List
+        </a>
+    </c:if>
+    
+    <!-- If listing clubs -->
+    <c:if test="${empty club}">
+        <h3>Select a Club to Manage</h3>
+        <c:if test="${not empty clubs}">
+            <div class="list-group">
+                <c:forEach items="${clubs}" var="club">
+                    <a href="${pageContext.request.contextPath}/committee/manage-members?action=view&clubID=${club.clubID}" 
+                       class="list-group-item list-group-item-action">
+                        <h5>${club.clubName}</h5>
+                        <p class="mb-1">${club.clubDescription}</p>
+                    </a>
+                </c:forEach>
+            </div>
         </c:if>
-    </div>
+        <c:if test="${empty clubs}">
+            <p class="text-muted">You are not managing any clubs</p>
+        </c:if>
+    </c:if>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
