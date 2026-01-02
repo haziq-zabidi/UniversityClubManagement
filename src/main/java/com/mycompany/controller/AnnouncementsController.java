@@ -44,7 +44,7 @@ public class AnnouncementsController extends HttpServlet{
         response.setDateHeader("Expires", 0);
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("roleID") == null || 
-            (Integer)session.getAttribute("roleID") != 1) {
+            (Integer)session.getAttribute("roleID") != 2) {
             // Not logged in or not admin → redirect to login
             response.sendRedirect(request.getContextPath() + "/login");
             return;
