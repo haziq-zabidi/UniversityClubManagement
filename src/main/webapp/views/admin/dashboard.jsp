@@ -12,6 +12,9 @@
     <ul>
         <li><a href="${pageContext.request.contextPath}/admin/manage-clubs">Manage Clubs</a></li>
         <li><a href="${pageContext.request.contextPath}/admin/manage-users">Manage Users</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/activities">Manage Activities</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/announcements">Manage Announcements</a></li>
+
     </ul>
 
     <p><a href="${pageContext.request.contextPath}/logout">Logout</a></p>

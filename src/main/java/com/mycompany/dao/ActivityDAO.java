@@ -134,4 +134,32 @@ public class ActivityDAO {
             return ps.executeUpdate() > 0;
         }
     }
+    
+    // ADMIN: get all activities (all clubs)
+public List<Activity> getAllActivities() throws SQLException, ClassNotFoundException {
+    List<Activity> list = new ArrayList<>();
+    String sql = "SELECT * FROM activity";
+
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            Activity a = new Activity();
+            a.setActivityID(rs.getInt("activityID"));
+            a.setActivityName(rs.getString("activityName"));
+            a.setActivityDescription(rs.getString("activityDescription"));
+            a.setStartDate(rs.getDate("startDate").toLocalDate());
+            a.setEndDate(rs.getDate("endDate").toLocalDate());
+            a.setActivityLocation(rs.getString("activityLocation"));
+            a.setActivityType(rs.getString("activityType"));
+            a.setActivityStatus(rs.getString("activityStatus"));
+            a.setMaxParticipants(rs.getInt("maxParticipants"));
+            a.setClubID(rs.getInt("clubID"));
+            list.add(a);
+        }
+    }
+    return list;
+}
+
 }
