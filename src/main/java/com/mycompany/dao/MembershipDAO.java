@@ -1,5 +1,6 @@
 package com.mycompany.dao;
 
+import com.mycompany.model.Club;
 import com.mycompany.model.Membership;
 import com.mycompany.model.User;
 import java.sql.*;
@@ -233,6 +234,240 @@ public class MembershipDAO {
             int rowsAffected = pstmt.executeUpdate();
             
             return rowsAffected > 0;
+        }
+    }
+    
+    // Submit join request with Pending status
+    public boolean submitJoinRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        // Check if already has any membership record
+        String checkSql = "SELECT membershipStatus FROM membership WHERE userID = ? AND clubID = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+            checkPs.setInt(1, userID);
+            checkPs.setInt(2, clubID);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("membershipStatus");
+                    if (status.equals("Pending") || status.equals("Active")) {
+                        return false; // Already has pending or active membership
+                    }
+                    // If previously rejected or inactive, update to Pending
+                    String updateSql = "UPDATE membership SET membershipStatus = 'Pending', joinDate = CURDATE() " +
+                                       "WHERE userID = ? AND clubID = ?";
+                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                        updatePs.setInt(1, userID);
+                        updatePs.setInt(2, clubID);
+                        return updatePs.executeUpdate() > 0;
+                    }
+                }
+            }
+        }
+        
+        // Create new membership record
+        String insertSql = "INSERT INTO membership (userID, clubID, membershipStatus, joinDate) " +
+                           "VALUES (?, ?, 'Pending', CURDATE())";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(insertSql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Submit leave request - update status to Pending Leave
+    public boolean submitLeaveRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        // First check if user is an active member
+        String checkSql = "SELECT membershipStatus FROM membership WHERE userID = ? AND clubID = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+            checkPs.setInt(1, userID);
+            checkPs.setInt(2, clubID);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("membershipStatus");
+                    if (status.equals("Active")) {
+                        // Update to "Pending Leave"
+                        String updateSql = "UPDATE membership SET membershipStatus = 'Pending Leave' " +
+                                           "WHERE userID = ? AND clubID = ?";
+                        try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                            updatePs.setInt(1, userID);
+                            updatePs.setInt(2, clubID);
+                            return updatePs.executeUpdate() > 0;
+                        }
+                    } else if (status.equals("Pending Leave")) {
+                        return false; // Already has pending leave request
+                    }
+                }
+            }
+        }
+        return false; // Not an active member
+    }
+    
+    // Cancel pending request (for both join and leave)
+    public boolean cancelPendingRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM membership WHERE userID = ? AND clubID = ? " +
+                     "AND (membershipStatus = 'Pending' OR membershipStatus = 'Pending Leave')";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Get active clubs for user
+    public List<Club> getActiveClubsByUserID(int userID) throws SQLException, ClassNotFoundException {
+        List<Club> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM club c JOIN membership m ON c.clubID = m.clubID " +
+                     "WHERE m.userID = ? AND m.membershipStatus = 'Active'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Club c = new Club();
+                    c.setClubID(rs.getInt("clubID"));
+                    c.setClubName(rs.getString("clubName"));
+                    c.setClubDescription(rs.getString("clubDescription"));
+                    c.setClubCategory(rs.getString("clubCategory"));
+                    c.setAdminUserID(rs.getInt("adminUserID"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+    
+    // Get pending join requests for user
+    public List<Club> getPendingJoinClubsByUserID(int userID) throws SQLException, ClassNotFoundException {
+        List<Club> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM club c JOIN membership m ON c.clubID = m.clubID " +
+                     "WHERE m.userID = ? AND m.membershipStatus = 'Pending'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Club c = new Club();
+                    c.setClubID(rs.getInt("clubID"));
+                    c.setClubName(rs.getString("clubName"));
+                    c.setClubDescription(rs.getString("clubDescription"));
+                    c.setClubCategory(rs.getString("clubCategory"));
+                    c.setAdminUserID(rs.getInt("adminUserID"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+    
+    // Get pending leave requests for user
+    public List<Club> getPendingLeaveClubsByUserID(int userID) throws SQLException, ClassNotFoundException {
+        List<Club> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM club c JOIN membership m ON c.clubID = m.clubID " +
+                     "WHERE m.userID = ? AND m.membershipStatus = 'Pending Leave'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Club c = new Club();
+                    c.setClubID(rs.getInt("clubID"));
+                    c.setClubName(rs.getString("clubName"));
+                    c.setClubDescription(rs.getString("clubDescription"));
+                    c.setClubCategory(rs.getString("clubCategory"));
+                    c.setAdminUserID(rs.getInt("adminUserID"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+    
+    // Check if user has any pending request for a club
+    public boolean hasPendingRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT COUNT(*) FROM membership WHERE userID = ? AND clubID = ? " +
+                     "AND (membershipStatus = 'Pending' OR membershipStatus = 'Pending Leave')";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+    
+    // Original method for announcements page (gets all clubs user is active in)
+    public List<Club> getClubsByUserID(int userID) throws SQLException, ClassNotFoundException {
+        List<Club> list = new ArrayList<>();
+        String sql = "SELECT c.* FROM club c JOIN membership m ON c.clubID = m.clubID " +
+                     "WHERE m.userID = ? AND m.membershipStatus = 'Active'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Club c = new Club();
+                    c.setClubID(rs.getInt("clubID"));
+                    c.setClubName(rs.getString("clubName"));
+                    c.setClubDescription(rs.getString("clubDescription"));
+                    c.setClubCategory(rs.getString("clubCategory"));
+                    c.setAdminUserID(rs.getInt("adminUserID"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+    
+    // Committee method: Approve join request
+    public boolean approveJoinRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE membership SET membershipStatus = 'Active' " +
+                     "WHERE userID = ? AND clubID = ? AND membershipStatus = 'Pending'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Committee method: Reject join request
+    public boolean rejectJoinRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM membership WHERE userID = ? AND clubID = ? AND membershipStatus = 'Pending'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Committee method: Approve leave request
+    public boolean approveLeaveRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM membership WHERE userID = ? AND clubID = ? AND membershipStatus = 'Pending Leave'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    // Committee method: Reject leave request
+    public boolean rejectLeaveRequest(int userID, int clubID) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE membership SET membershipStatus = 'Active' " +
+                     "WHERE userID = ? AND clubID = ? AND membershipStatus = 'Pending Leave'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ps.setInt(2, clubID);
+            return ps.executeUpdate() > 0;
         }
     }
 }

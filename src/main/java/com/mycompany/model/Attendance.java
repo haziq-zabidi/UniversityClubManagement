@@ -27,7 +27,7 @@ public class Attendance {
         this.userID = userID;
     }
 
-    public int getAnttendanceID() {
+    public int getAttendanceID() {
         return attendanceID;
     }
 
