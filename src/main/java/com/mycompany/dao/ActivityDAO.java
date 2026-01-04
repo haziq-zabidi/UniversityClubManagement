@@ -162,4 +162,19 @@ public List<Activity> getAllActivities() throws SQLException, ClassNotFoundExcep
     return list;
 }
 
+// Add this method to ActivityDAO.java
+public int getActiveActivityCount(int clubID) throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM activity WHERE clubID = ? AND activityStatus = 'Open'";
+    
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, clubID);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
 }

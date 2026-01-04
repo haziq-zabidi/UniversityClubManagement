@@ -199,5 +199,20 @@ public void adminDeleteAnnouncement(int id)
     }
 }
 
+// Add this method to AnnouncementDAO.java
+public int getAnnouncementCount(int clubID) throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM announcement WHERE clubID = ?";
+    
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, clubID);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
 
 }

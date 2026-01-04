@@ -10,6 +10,22 @@ import java.time.LocalDate;
 
 public class MembershipDAO {
 
+    
+    // Add this method to MembershipDAO.java
+public int getActiveMemberCount(int clubID) throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM membership WHERE clubID = ? AND membershipStatus = 'Active'";
+    
+    try (Connection conn = DBConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, clubID);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
     // Add user to club
     public boolean addMembership(Membership m) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO membership (joinDate, membershipStatus, userID, clubID) VALUES (?,?,?,?)";

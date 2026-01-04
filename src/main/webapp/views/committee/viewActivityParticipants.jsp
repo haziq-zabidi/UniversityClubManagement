@@ -2,189 +2,269 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Activity Participants</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Participants - UCMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
 </head>
-<body>
-<div class="container mt-5">
-    <h2>Activity Participants</h2>
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
     
-    <!-- Activity Details -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">${activity.activityName}</h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Type:</strong> ${activity.activityType}</p>
-                    <p><strong>Location:</strong> ${activity.activityLocation}</p>
-                    <p><strong>Description:</strong> ${activity.activityDescription}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Start Date:</strong> ${activity.startDate}</p>
-                    <p><strong>End Date:</strong> ${activity.endDate}</p>
-                    <p><strong>Status:</strong> 
-                        <c:choose>
-                            <c:when test="${activity.activityStatus == 'Open'}">
-                                <span class="badge bg-success">Open</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="badge bg-secondary">Closed</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </p>
-                    <p><strong>Capacity:</strong> ${fn:length(participants)} / ${activity.maxParticipants} participants</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Participants List -->
-    <div class="card">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">
-                <i class="bi bi-people-fill"></i> 
-                Registered Participants (${fn:length(participants)})
-            </h5>
-        </div>
-        <div class="card-body">
-            <c:if test="${not empty participants}">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Matric No</th>
-                                <th>Faculty</th>
-                                <th>Programme</th>
-                                <th>Registration Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${participants}" var="attendance" varStatus="status">
-                                <tr>
-                                    <td>${status.index + 1}</td>
-                                    <td><strong>${attendance.user.userName}</strong></td>
-                                    <td>${attendance.user.userEmail}</td>
-                                    <td>${attendance.user.matricNo}</td>
-                                    <td>${attendance.user.faculty}</td>
-                                    <td>${attendance.user.programme}</td>
-                                    <td>${attendance.attendanceDate}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${attendance.attendanceStatus == 'Present'}">
-                                                <span class="badge bg-success">
-                                                    <i class="bi bi-check-circle"></i> Registered
-                                                </span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="badge bg-warning">
-                                                    <i class="bi bi-clock"></i> ${attendance.attendanceStatus}
-                                                </span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b border-gray-200 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold text-gray-900">UCMS</span>
+                        <span class="ml-2 text-xs font-medium text-white bg-purple-600 px-2 py-1 rounded">Committee</span>
+                    </div>
                 </div>
                 
-                <!-- Export Options -->
-                <div class="mt-3">
-                    <button class="btn btn-outline-success" onclick="exportToCSV()">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> Export to CSV
-                    </button>
-                    <button class="btn btn-outline-primary" onclick="window.print()">
-                        <i class="bi bi-printer"></i> Print List
-                    </button>
+                <div class="hidden md:flex space-x-4">
+                    <a href="${pageContext.request.contextPath}/committee/dashboard" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                        Dashboard
+                    </a>
+                    <a href="${pageContext.request.contextPath}/committee/profile" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                        Profile
+                    </a>
                 </div>
-            </c:if>
+                
+                <div class="flex items-center">
+                    <a href="${pageContext.request.contextPath}/logout" 
+                       class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition duration-200">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="mb-8 no-print">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Activity Participants</h1>
+                    <p class="text-gray-600 mt-1">View and manage participant list</p>
+                </div>
+                <a href="${pageContext.request.contextPath}/committee/manage-activities?clubID=${clubID}" 
+                   class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition duration-200">
+                    ← Back to Activities
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity Details Card -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">${activity.activityName}</h2>
             
-            <c:if test="${empty participants}">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> 
-                    No participants have registered for this activity yet.
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Type:</span>
+                        <span class="text-gray-600">${activity.activityType}</span>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Location:</span>
+                        <span class="text-gray-600">${activity.activityLocation}</span>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Description:</span>
+                        <span class="text-gray-600">${activity.activityDescription}</span>
+                    </div>
                 </div>
-            </c:if>
+                
+                <div class="space-y-2">
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Start Date:</span>
+                        <span class="text-gray-600">${activity.startDate}</span>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">End Date:</span>
+                        <span class="text-gray-600">${activity.endDate}</span>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Status:</span>
+                        <c:choose>
+                            <c:when test="${activity.activityStatus == 'Open'}">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Open</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Closed</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="font-medium text-gray-700 w-32">Capacity:</span>
+                        <span class="text-gray-600">${fn:length(participants)} / ${activity.maxParticipants} participants</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <c:if test="${not empty participants}">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 no-print">
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Registered</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2">${fn:length(participants)}</p>
+                        </div>
+                        <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Max Capacity</p>
+                            <p class="text-3xl font-bold text-purple-600 mt-2">${activity.maxParticipants}</p>
+                        </div>
+                        <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Slots Remaining</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2">${activity.maxParticipants - fn:length(participants)}</p>
+                        </div>
+                        <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
+        <!-- Participants List -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4 no-print">
+                <h2 class="text-xl font-bold text-gray-900">Registered Participants (${fn:length(participants)})</h2>
+                <div class="flex space-x-2">
+                    <button onclick="exportToCSV()" 
+                            class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
+                        Export CSV
+                    </button>
+                    <button onclick="window.print()" 
+                            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-200">
+                        Print List
+                    </button>
+                </div>
+            </div>
+            
+            <c:choose>
+                <c:when test="${empty participants}">
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-600">No participants registered yet</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">#</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Matric No</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Faculty</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Programme</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Registration Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase no-print">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <c:forEach items="${participants}" var="attendance" varStatus="status">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-4 text-sm text-gray-600">${status.index + 1}</td>
+                                        <td class="px-4 py-4 text-sm font-medium text-gray-900">${attendance.user.userName}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">${attendance.user.userEmail}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">${attendance.user.matricNo}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">${attendance.user.faculty}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">${attendance.user.programme}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">${attendance.attendanceDate}</td>
+                                        <td class="px-4 py-4 no-print">
+                                            <c:choose>
+                                                <c:when test="${attendance.attendanceStatus == 'Present'}">
+                                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                        Registered
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                                        ${attendance.attendanceStatus}
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
-    
-    <!-- Statistics Card -->
-    <c:if test="${not empty participants}">
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Registered</h5>
-                        <h2 class="text-primary">${fn:length(participants)}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Capacity</h5>
-                        <h2 class="text-info">${activity.maxParticipants}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Slots Remaining</h5>
-                        <h2 class="text-success">${activity.maxParticipants - fn:length(participants)}</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </c:if>
-    
-    <div class="mt-4">
-        <a href="${pageContext.request.contextPath}/committee/manage-activities?clubID=${clubID}" 
-           class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Activities
-        </a>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function exportToCSV() {
-    var csv = 'Name,Email,Matric No,Faculty,Programme,Registration Date,Status\n';
-    
-    <c:forEach items="${participants}" var="attendance">
-        csv += '"${attendance.user.userName}",';
-        csv += '"${attendance.user.userEmail}",';
-        csv += '"${attendance.user.matricNo}",';
-        csv += '"${attendance.user.faculty}",';
-        csv += '"${attendance.user.programme}",';
-        csv += '"${attendance.attendanceDate}",';
-        csv += '"${attendance.attendanceStatus}"\n';
-    </c:forEach>
-    
-    var blob = new Blob([csv], { type: 'text/csv' });
-    var url = window.URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = '${activity.activityName}_participants.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-</script>
-
-<style>
-@media print {
-    .btn, .card-header { display: none !important; }
-}
-</style>
+    <script>
+        function exportToCSV() {
+            var csv = 'Name,Email,Matric No,Faculty,Programme,Registration Date,Status\n';
+            
+            <c:forEach items="${participants}" var="attendance">
+                csv += '"${attendance.user.userName}",';
+                csv += '"${attendance.user.userEmail}",';
+                csv += '"${attendance.user.matricNo}",';
+                csv += '"${attendance.user.faculty}",';
+                csv += '"${attendance.user.programme}",';
+                csv += '"${attendance.attendanceDate}",';
+                csv += '"${attendance.attendanceStatus}"\n';
+            </c:forEach>
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = '${activity.activityName}_participants.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
 </body>
 </html>

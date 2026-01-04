@@ -69,12 +69,11 @@ public class ClubDAO {
         return c;
     }
 
-    // Get all clubs where a user is a committee member
+    // Get all clubs where a user is a committee member (via adminUserID)
     public List<Club> getClubsByCommittee(int userID) throws SQLException, ClassNotFoundException {
         List<Club> list = new ArrayList<>();
-        String sql = "SELECT c.* FROM club c "
-                   + "JOIN membership m ON c.clubID = m.clubID "
-                   + "WHERE m.userID = ? AND m.membershipStatus = 'Active'";
+        // Committee members are assigned via adminUserID field in club table
+        String sql = "SELECT * FROM club WHERE adminUserID = ?";
         
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
