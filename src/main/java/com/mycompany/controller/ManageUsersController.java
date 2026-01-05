@@ -44,7 +44,6 @@ public class ManageUsersController extends HttpServlet {
 
         try {
             if ("create".equals(action)) {
-
                 User u = new User();
                 u.setUserName(request.getParameter("name"));
                 u.setUserEmail(request.getParameter("email"));
@@ -56,20 +55,26 @@ public class ManageUsersController extends HttpServlet {
 
                 dao.addUser(u);
             }
-
             else if ("update".equals(action)) {
-
+                // Get userID from hidden field
+                String userIDStr = request.getParameter("userID");
+                if (userIDStr == null || userIDStr.trim().isEmpty()) {
+                    throw new ServletException("User ID is required for update");
+                }
+                
                 User u = new User();
+                u.setUserID(Integer.parseInt(userIDStr)); // CRITICAL: Set the userID
                 u.setUserName(request.getParameter("name"));
                 u.setUserEmail(request.getParameter("email"));
                 u.setUserPassword(request.getParameter("password"));
+                u.setMatricNo(request.getParameter("matric")); // Add this
                 u.setFaculty(request.getParameter("faculty"));
                 u.setProgramme(request.getParameter("programme"));
                 u.setRoleID(Integer.parseInt(request.getParameter("role")));
 
-                dao.updateUser(u);
+                boolean updated = dao.updateUser(u);
+                System.out.println("Update successful: " + updated);
             }
-
             else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("userID"));
                 dao.deleteUser(id);
@@ -78,7 +83,8 @@ public class ManageUsersController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/manage-users");
 
         } catch (SQLException | ClassNotFoundException e) {
-            throw new ServletException(e);
+            e.printStackTrace(); // Add this to see error details
+            throw new ServletException("Database error: " + e.getMessage());
         }
     }
 }

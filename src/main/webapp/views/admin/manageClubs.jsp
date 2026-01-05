@@ -32,16 +32,28 @@
                     </div>
                 </div>
                 
-                <div class="hidden md:flex space-x-4">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard" 
-                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-                        Dashboard
-                    </a>
-                    <a href="${pageContext.request.contextPath}/admin/manage-clubs" 
-                       class="px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700">
-                        Manage Clubs
-                    </a>
-                </div>
+                <div class="hidden md:flex space-x-1">
+    <a href="${pageContext.request.contextPath}/admin/dashboard" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Dashboard
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/manage-clubs" 
+       class="px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700">
+        Manage Clubs
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/manage-users" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Users
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/activities" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Activities
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/announcements" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Announcements
+    </a>
+</div>
                 
                 <div class="flex items-center">
                     <a href="${pageContext.request.contextPath}/logout" 

@@ -68,10 +68,7 @@
                             View Members
                         </a>
                     </c:if>
-                    <a href="${pageContext.request.contextPath}/committee/profile" 
-                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-                        Profile
-                    </a>
+                    
                 </div>
                 
                 <div class="flex items-center">

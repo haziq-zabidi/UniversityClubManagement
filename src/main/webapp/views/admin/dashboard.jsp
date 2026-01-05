@@ -33,14 +33,26 @@
                 </div>
                 
                 <!-- Navigation Links -->
-                <div class="hidden md:flex space-x-4">
+                <div class="hidden md:flex space-x-1">
                     <a href="${pageContext.request.contextPath}/admin/dashboard" 
                        class="px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700">
                         Dashboard
                     </a>
-                    <a href="${pageContext.request.contextPath}/admin/profile" 
-                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-                        Profile
+                    <a href="${pageContext.request.contextPath}/admin/manage-clubs" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                        Manage Clubs
+                    </a>
+                    <a href="${pageContext.request.contextPath}/admin/manage-users" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                        Manage Users
+                    </a>
+                    <a href="${pageContext.request.contextPath}/admin/activities" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                        Manage Activities
+                    </a>
+                    <a href="${pageContext.request.contextPath}/admin/announcements" 
+                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                        Manage Announcements
                     </a>
                 </div>
                 
@@ -65,74 +77,30 @@
         </div>
 
         <!-- Quick Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <!-- Total Clubs -->
-    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-gray-600">Total Clubs</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">${totalClubs}</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Clubs -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Clubs</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${totalClubs}</p>
+                        <p class="text-xs text-gray-500 mt-1">${activeMembers} active members</p>
+                    </div>
+                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Users -->
-    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-gray-600">Total Users</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">${totalUsers}</p>
-            </div>
-            <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Activities -->
-    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-gray-600">Total Activities</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">${totalActivities}</p>
-            </div>
-            <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Announcements -->
-    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-gray-600">Announcements</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">${totalAnnouncements}</p>
-            </div>
-            <div class="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-</div>
 
             <!-- Total Users -->
             <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Total Users</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${totalUsers}</p>
+                        <p class="text-xs text-gray-500 mt-1">Registered in system</p>
                     </div>
                     <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +115,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Total Activities</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${totalActivities}</p>
+                        <p class="text-xs text-gray-500 mt-1">Events & activities</p>
                     </div>
                     <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +131,15 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Announcements</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${totalAnnouncements}</p>
+                        <c:choose>
+                            <c:when test="${pendingMembers > 0}">
+                                <p class="text-xs text-red-500 mt-1">${pendingMembers} pending approvals</p>
+                            </c:when>
+                            <c:otherwise>
+                                <p class="text-xs text-gray-500 mt-1">All up to date</p>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                     <div class="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                         <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,25 +231,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                     </svg>
                 </a>
-            </div>
-        </div>
-
-        <!-- System Info Card -->
-        <div class="mt-6 bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <svg class="h-8 w-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div>
-                        <h3 class="text-lg font-bold">System Information</h3>
-                        <p class="text-sm text-gray-300">University Club Management System v1.0</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-300">Admin Access Level</p>
-                    <p class="text-lg font-bold">Full Control</p>
-                </div>
             </div>
         </div>
     </div>

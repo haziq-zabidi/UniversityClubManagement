@@ -50,20 +50,28 @@
                 </div>
                 
                 <!-- Navigation Links -->
-                <div class="hidden md:flex space-x-4">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard" 
-                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-                        Dashboard
-                    </a>
-                    <a href="${pageContext.request.contextPath}/admin/manage-users" 
-                       class="px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700">
-                        Manage Users
-                    </a>
-                    <a href="${pageContext.request.contextPath}/admin/profile" 
-                       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
-                        Profile
-                    </a>
-                </div>
+<div class="hidden md:flex space-x-1">
+    <a href="${pageContext.request.contextPath}/admin/dashboard" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Dashboard
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/manage-clubs" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Clubs
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/manage-users" 
+       class="px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700">
+        Manage Users
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/activities" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Activities
+    </a>
+    <a href="${pageContext.request.contextPath}/admin/announcements" 
+       class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+        Manage Announcements
+    </a>
+</div>
                 
                 <!-- Logout Button -->
                 <div class="flex items-center">
@@ -255,7 +263,8 @@
             <form action="${pageContext.request.contextPath}/admin/manage-users" method="post">
                 <div class="p-6 space-y-4">
                     <input type="hidden" name="action" value="update"/>
-                    <input type="hidden" name="email" id="editEmail"/>
+                    <!-- CRITICAL FIX: Add hidden userID field -->
+                    <input type="hidden" name="userID" id="editUserID"/>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -265,9 +274,9 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address (Read-only)</label>
-                            <input type="email" id="editEmailDisplay" disabled
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" name="email" id="editEmail" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         </div>
                     </div>
                     
@@ -280,8 +289,8 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Matric Number</label>
-                            <input type="text" id="editMatricDisplay" disabled
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+                            <input type="text" name="matric" id="editMatric"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         </div>
                     </div>
                     
@@ -333,14 +342,16 @@
         }
         
         function editUser(id, name, email, password, matric, faculty, programme, roleID) {
+            // CRITICAL: Set the userID in the hidden field
+            document.getElementById('editUserID').value = id;
             document.getElementById('editName').value = name;
             document.getElementById('editEmail').value = email;
-            document.getElementById('editEmailDisplay').value = email;
             document.getElementById('editPassword').value = password;
-            document.getElementById('editMatricDisplay').value = matric || '';
+            document.getElementById('editMatric').value = matric || '';
             document.getElementById('editFaculty').value = faculty || '';
             document.getElementById('editProgramme').value = programme || '';
             document.getElementById('editRole').value = roleID;
+            
             openModal('editUserModal');
         }
         
@@ -349,6 +360,14 @@
                 event.target.classList.remove('show');
             }
         }
+        
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal('createUserModal');
+                closeModal('editUserModal');
+            }
+        });
     </script>
 </body>
 </html>

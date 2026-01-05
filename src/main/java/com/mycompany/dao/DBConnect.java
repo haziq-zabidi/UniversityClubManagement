@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBConnect {
 
-    private static final String url = "jdbc:mariadb://localhost:3306/club_management_db"; // your DB
+    private static final String url = "jdbc:mariadb://localhost:3307/club_management_db"; // your DB
     private static final String username = "root"; // default XAMPP username
     private static final String password = ""; // default XAMPP password
 

@@ -4,6 +4,7 @@ import com.mycompany.dao.ClubDAO;
 import com.mycompany.dao.UsersDAO;
 import com.mycompany.dao.ActivityDAO;
 import com.mycompany.dao.AnnouncementDAO;
+import com.mycompany.dao.MembershipDAO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -39,18 +40,23 @@ public class AdminDashboardController extends HttpServlet {
             UsersDAO usersDAO = new UsersDAO();
             ActivityDAO activityDAO = new ActivityDAO();
             AnnouncementDAO announcementDAO = new AnnouncementDAO();
+            MembershipDAO membershipDAO = new MembershipDAO(); // You'll need to create this
             
             // Get counts
             int totalClubs = clubDAO.getTotalClubCount();
             int totalUsers = usersDAO.getTotalUserCount();
             int totalActivities = activityDAO.getTotalActivityCount();
             int totalAnnouncements = announcementDAO.getTotalAnnouncementCount();
+            int activeMembers = membershipDAO.getActiveMembersCount();
+            int pendingMembers = membershipDAO.getPendingMembersCount();
             
             // Set attributes
             request.setAttribute("totalClubs", totalClubs);
             request.setAttribute("totalUsers", totalUsers);
             request.setAttribute("totalActivities", totalActivities);
             request.setAttribute("totalAnnouncements", totalAnnouncements);
+            request.setAttribute("activeMembers", activeMembers);
+            request.setAttribute("pendingMembers", pendingMembers);
             
             // Forward to admin dashboard JSP
             RequestDispatcher dispatcher = request.getRequestDispatcher("/views/admin/dashboard.jsp");
