@@ -280,8 +280,8 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Matric Number</label>
-                            <input type="text" name="matric" id="editMatric"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <input type="text" id="editMatricDisplay" disabled
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
                         </div>
                     </div>
                     
@@ -337,7 +337,7 @@
             document.getElementById('editEmail').value = email;
             document.getElementById('editEmailDisplay').value = email;
             document.getElementById('editPassword').value = password;
-            document.getElementById('editMatric').value = matric || '';
+            document.getElementById('editMatricDisplay').value = matric || '';
             document.getElementById('editFaculty').value = faculty || '';
             document.getElementById('editProgramme').value = programme || '';
             document.getElementById('editRole').value = roleID;
