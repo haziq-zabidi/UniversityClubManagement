@@ -47,16 +47,16 @@ public class AdminDashboardController extends HttpServlet {
             int totalUsers = usersDAO.getTotalUserCount();
             int totalActivities = activityDAO.getTotalActivityCount();
             int totalAnnouncements = announcementDAO.getTotalAnnouncementCount();
-            int activeMembers = membershipDAO.getActiveMembersCount();
-            int pendingMembers = membershipDAO.getPendingMembersCount();
+            //int activeMembers = membershipDAO.getActiveMembersCount();
+            //int pendingMembers = membershipDAO.getPendingMembersCount();
             
             // Set attributes
             request.setAttribute("totalClubs", totalClubs);
             request.setAttribute("totalUsers", totalUsers);
             request.setAttribute("totalActivities", totalActivities);
             request.setAttribute("totalAnnouncements", totalAnnouncements);
-            request.setAttribute("activeMembers", activeMembers);
-            request.setAttribute("pendingMembers", pendingMembers);
+            //request.setAttribute("activeMembers", activeMembers);
+            //request.setAttribute("pendingMembers", pendingMembers);
             
             // Forward to admin dashboard JSP
             RequestDispatcher dispatcher = request.getRequestDispatcher("/views/admin/dashboard.jsp");
