@@ -85,21 +85,23 @@ public int getTotalUserCount() throws SQLException, ClassNotFoundException {
     }
 
     // Update user info (admin/user edit)
-    public boolean updateUser(User u) throws SQLException, ClassNotFoundException {
-        Connection conn = DBConnect.getConnection();
-        PreparedStatement ps = conn.prepareStatement(
-            "UPDATE user SET userName=?, userPassword=?, faculty=?, programme=?, roleID=? WHERE userEmail=?"
-        );
-        ps.setString(1, u.getUserName());
-        ps.setString(2, u.getUserPassword());
-        ps.setString(3, u.getFaculty());
-        ps.setString(4, u.getProgramme());
-        ps.setInt(5, u.getRoleID());
-        ps.setString(6, u.getUserEmail());
-        boolean updated = ps.executeUpdate() > 0;
-        DBConnect.closeConnection(conn);
-        return updated;
-    }
+public boolean updateUser(User u) throws SQLException, ClassNotFoundException {
+    Connection conn = DBConnect.getConnection();
+    PreparedStatement ps = conn.prepareStatement(
+        "UPDATE user SET userName=?, userEmail=?, userPassword=?, matricNo=?, faculty=?, programme=?, roleID=? WHERE userID=?"
+    );
+    ps.setString(1, u.getUserName());
+    ps.setString(2, u.getUserEmail());
+    ps.setString(3, u.getUserPassword());
+    ps.setString(4, u.getMatricNo());
+    ps.setString(5, u.getFaculty());
+    ps.setString(6, u.getProgramme());
+    ps.setInt(7, u.getRoleID());
+    ps.setInt(8, u.getUserID());
+    boolean updated = ps.executeUpdate() > 0;
+    DBConnect.closeConnection(conn);
+    return updated;
+}
 
     // Delete user (admin)
     public boolean deleteUser(int userID) throws SQLException, ClassNotFoundException {
@@ -166,6 +168,10 @@ public int getTotalUserCount() throws SQLException, ClassNotFoundException {
         }
     }
     
+    // Get user by ID (alias method for compatibility)
+public User getUserById(int userID) throws SQLException, ClassNotFoundException {
+    return getUserByID(userID); // Just calls your existing method
+}
     // Check if email already exists (for other users)
     public boolean isEmailExists(String email, int excludeUserID) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM user WHERE userEmail = ? AND userID != ?";
