@@ -7,6 +7,20 @@ import java.util.List;
 
 public class ActivityDAO {
 
+    // Get total activity count
+public int getTotalActivityCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM activity";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
     // Add a new activity and return generated ID
     public int addActivity(Activity a) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO activity (activityName, activityDescription, startDate, endDate, activityLocation, activityType, activityStatus, maxParticipants, clubID) VALUES (?,?,?,?,?,?,?,?,?)";

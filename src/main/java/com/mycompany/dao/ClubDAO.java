@@ -7,6 +7,21 @@ import java.util.List;
 
 public class ClubDAO {
 
+    // Get total club count
+public int getTotalClubCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM club";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
+
     // Get all clubs
     public List<Club> getAllClubs() throws SQLException, ClassNotFoundException {
         List<Club> list = new ArrayList<>();

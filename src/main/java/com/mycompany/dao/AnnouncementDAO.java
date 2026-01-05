@@ -7,6 +7,20 @@ import java.util.List;
 
 public class AnnouncementDAO {
 
+    // Get total announcement count
+public int getTotalAnnouncementCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM announcement";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
     // Add new announcement
     public boolean addAnnouncement(Announcement a) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO announcement (announcementTitle, announcementMessage, publishDate, clubID, authorUserID) VALUES (?,?,?,?,?)";

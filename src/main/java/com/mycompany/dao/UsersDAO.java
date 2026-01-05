@@ -7,6 +7,21 @@ import java.util.List;
 
 public class UsersDAO {
 
+    // Get total user count
+public int getTotalUserCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM user";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
+
     // Get all users (for admin user management)
     public List<User> getAllUsers() throws SQLException, ClassNotFoundException {
         List<User> list = new ArrayList<>();
