@@ -1,11 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.controller;
 
 import com.mycompany.dao.UsersDAO;
 import com.mycompany.model.User;
+import com.mycompany.util.PasswordUtil; // ADD THIS IMPORT
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,11 +13,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
- *
- * @author TUF
- */
-
 @WebServlet("/user/profile")
 public class ProfileController extends HttpServlet {
     
@@ -28,14 +20,13 @@ public class ProfileController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Prevent Back Button Cache
         response.setHeader("Cache-Control","no-cache, no-store, must-revalidate"); 
         response.setHeader("Pragma","no-cache");
         response.setDateHeader("Expires", 0);
+        
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("roleID") == null || 
             (Integer)session.getAttribute("roleID") != 2) {
-            // Not logged in or not admin → redirect to login
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -53,10 +44,9 @@ public class ProfileController extends HttpServlet {
             
             if (user != null) {
                 request.setAttribute("user", user);
-                request.setAttribute("userName", user.getUserName()); // For header
+                request.setAttribute("userName", user.getUserName());
             }
             
-            // Check for success/error messages
             String success = request.getParameter("success");
             String error = request.getParameter("error");
             
@@ -117,14 +107,12 @@ public class ProfileController extends HttpServlet {
             UsersDAO userDAO = new UsersDAO();
             
             if ("update_profile".equals(action)) {
-                // Update profile information
                 String userName = request.getParameter("userName");
                 String userEmail = request.getParameter("userEmail");
                 String matricNo = request.getParameter("matricNo");
                 String faculty = request.getParameter("faculty");
                 String programme = request.getParameter("programme");
                 
-                // Check if email already exists (for other users)
                 if (userDAO.isEmailExists(userEmail, userID)) {
                     response.sendRedirect(request.getContextPath() + "/user/profile?error=email_exists");
                     return;
@@ -141,7 +129,6 @@ public class ProfileController extends HttpServlet {
                 boolean success = userDAO.updateUserProfile(user);
                 
                 if (success) {
-                    // Update session with new name
                     session.setAttribute("userName", userName);
                     response.sendRedirect(request.getContextPath() + "/user/profile?success=profile_updated");
                 } else {
@@ -149,15 +136,14 @@ public class ProfileController extends HttpServlet {
                 }
                 
             } else if ("change_password".equals(action)) {
-                // Change password
                 String currentPassword = request.getParameter("currentPassword");
                 String newPassword = request.getParameter("newPassword");
                 String confirmPassword = request.getParameter("confirmPassword");
                 
-                // Get current user to verify password
                 User user = userDAO.getUserByID(userID);
                 
-                if (user == null || !user.getUserPassword().equals(currentPassword)) {
+                // VERIFY CURRENT PASSWORD USING HASH
+                if (user == null || !PasswordUtil.verifyPassword(currentPassword, user.getUserPassword())) {
                     response.sendRedirect(request.getContextPath() + "/user/profile?error=password_mismatch");
                     return;
                 }
@@ -167,7 +153,8 @@ public class ProfileController extends HttpServlet {
                     return;
                 }
                 
-                boolean success = userDAO.updatePassword(userID, newPassword);
+                // HASH NEW PASSWORD BEFORE SAVING
+                boolean success = userDAO.updatePassword(userID, PasswordUtil.hashPassword(newPassword));
                 
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/user/profile?success=password_updated");
@@ -183,5 +170,4 @@ public class ProfileController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/user/profile?error=system_error");
         }
     }
-    
 }
