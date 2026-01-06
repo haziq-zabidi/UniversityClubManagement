@@ -8,11 +8,56 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AttendanceDAO {
 
+    // Get total attendance count
+public int getTotalAttendanceCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM attendance";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
+
+// Get present count
+public int getPresentCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM attendance WHERE attendanceStatus = 'Present'";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
+
+// Get absent count
+public int getAbsentCount() throws SQLException, ClassNotFoundException {
+    int count = 0;
+    String sql = "SELECT COUNT(*) as total FROM attendance WHERE attendanceStatus = 'Absent'";
+    
+    try (Connection conn = DBConnect.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        if (rs.next()) {
+            count = rs.getInt("total");
+        }
+    }
+    return count;
+}
     public boolean addAttendance(Attendance a) throws SQLException, ClassNotFoundException {
         String sql = """
             INSERT INTO attendance (attendanceDate, attendanceStatus, activityID, userID)

@@ -8,19 +8,63 @@ import java.util.List;
 public class ActivityDAO {
 
     // Get total activity count
-public int getTotalActivityCount() throws SQLException, ClassNotFoundException {
-    int count = 0;
-    String sql = "SELECT COUNT(*) as total FROM activity";
-    
-    try (Connection conn = DBConnect.getConnection();
-         Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery(sql)) {
-        if (rs.next()) {
-            count = rs.getInt("total");
+    public int getTotalActivityCount() throws SQLException, ClassNotFoundException {
+        int count = 0;
+        String sql = "SELECT COUNT(*) as total FROM activity";
+        
+        try (Connection conn = DBConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
         }
+        return count;
     }
-    return count;
-}
+
+    // Get all activities
+    public List<Activity> getAllActivities() throws SQLException, ClassNotFoundException {
+        List<Activity> list = new ArrayList<>();
+        String sql = "SELECT * FROM activity";
+        
+        try (Connection conn = DBConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                Activity activity = new Activity();
+                activity.setActivityID(rs.getInt("activityID"));
+                activity.setActivityName(rs.getString("activityName"));
+                activity.setActivityDescription(rs.getString("activityDescription"));
+                activity.setStartDate(rs.getDate("startDate").toLocalDate());
+                activity.setEndDate(rs.getDate("endDate").toLocalDate());
+                activity.setActivityLocation(rs.getString("activityLocation"));
+                activity.setActivityType(rs.getString("activityType"));
+                activity.setActivityStatus(rs.getString("activityStatus"));
+                activity.setMaxParticipants(rs.getInt("maxParticipants"));
+                activity.setClubID(rs.getInt("clubID"));
+                list.add(activity);
+            }
+        }
+        return list;
+    }
+
+    // Get active activity count for a club
+    public int getActiveActivityCount(int clubID) throws SQLException, ClassNotFoundException {
+        int count = 0;
+        String sql = "SELECT COUNT(*) as total FROM activity WHERE clubID = ? AND activityStatus = 'Open'";
+        
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
+        }
+        return count;
+    }
+    
     // Add a new activity and return generated ID
     public int addActivity(Activity a) throws SQLException, ClassNotFoundException {
         String sql = "INSERT INTO activity (activityName, activityDescription, startDate, endDate, activityLocation, activityType, activityStatus, maxParticipants, clubID) VALUES (?,?,?,?,?,?,?,?,?)";
@@ -148,47 +192,4 @@ public int getTotalActivityCount() throws SQLException, ClassNotFoundException {
             return ps.executeUpdate() > 0;
         }
     }
-    
-    // ADMIN: get all activities (all clubs)
-public List<Activity> getAllActivities() throws SQLException, ClassNotFoundException {
-    List<Activity> list = new ArrayList<>();
-    String sql = "SELECT * FROM activity";
-
-    try (Connection conn = DBConnect.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-
-        while (rs.next()) {
-            Activity a = new Activity();
-            a.setActivityID(rs.getInt("activityID"));
-            a.setActivityName(rs.getString("activityName"));
-            a.setActivityDescription(rs.getString("activityDescription"));
-            a.setStartDate(rs.getDate("startDate").toLocalDate());
-            a.setEndDate(rs.getDate("endDate").toLocalDate());
-            a.setActivityLocation(rs.getString("activityLocation"));
-            a.setActivityType(rs.getString("activityType"));
-            a.setActivityStatus(rs.getString("activityStatus"));
-            a.setMaxParticipants(rs.getInt("maxParticipants"));
-            a.setClubID(rs.getInt("clubID"));
-            list.add(a);
-        }
-    }
-    return list;
-}
-
-// Add this method to ActivityDAO.java
-public int getActiveActivityCount(int clubID) throws SQLException, ClassNotFoundException {
-    int count = 0;
-    String sql = "SELECT COUNT(*) as total FROM activity WHERE clubID = ? AND activityStatus = 'Open'";
-    
-    try (Connection conn = DBConnect.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, clubID);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            count = rs.getInt("total");
-        }
-    }
-    return count;
-}
 }
